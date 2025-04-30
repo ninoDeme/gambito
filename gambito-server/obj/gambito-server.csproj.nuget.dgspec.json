@@ -1,0 +1,88 @@
+{
+  "format": 1,
+  "restore": {
+    "/home/ricardo/Projects/gambito/gambito-server/gambito-server.csproj": {}
+  },
+  "projects": {
+    "/home/ricardo/Projects/gambito/gambito-server/gambito-server.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "/home/ricardo/Projects/gambito/gambito-server/gambito-server.csproj",
+        "projectName": "gambito-server",
+        "projectPath": "/home/ricardo/Projects/gambito/gambito-server/gambito-server.csproj",
+        "packagesPath": "/home/ricardo/.nuget/packages/",
+        "outputPath": "/home/ricardo/Projects/gambito/gambito-server/obj/",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "/home/ricardo/.nuget/NuGet/NuGet.Config"
+        ],
+        "originalTargetFrameworks": [
+          "net8.0"
+        ],
+        "sources": {
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net8.0": {
+            "targetAlias": "net8.0",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net8.0": {
+          "targetAlias": "net8.0",
+          "dependencies": {
+            "Microsoft.DotNet.ILCompiler": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[8.0.15, )",
+              "autoReferenced": true
+            },
+            "Microsoft.NET.ILLink.Tasks": {
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[8.0.15, )",
+              "autoReferenced": true
+            },
+            "Npgsql": {
+              "target": "Package",
+              "version": "[9.0.3, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "downloadDependencies": [
+            {
+              "name": "runtime.linux-x64.Microsoft.DotNet.ILCompiler",
+              "version": "[8.0.15, 8.0.15]"
+            }
+          ],
+          "frameworkReferences": {
+            "Microsoft.AspNetCore.App": {
+              "privateAssets": "none"
+            },
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "/usr/lib/dotnet/sdk/8.0.115/PortableRuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}

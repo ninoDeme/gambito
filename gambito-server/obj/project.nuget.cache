@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "dgSpecHash": "9VnZfppmOkCAww6SvsyUvhgE4kBAvfrgeJuZyeni37XN5mtMiSGPxCDsujVbbS8ifFFzTO3tHUjyqHsDAZmTOA==",
+  "success": true,
+  "projectFilePath": "/home/ricardo/Projects/gambito/gambito-server/gambito-server.csproj",
+  "expectedPackageFiles": [
+    "/home/ricardo/.nuget/packages/microsoft.dotnet.ilcompiler/8.0.15/microsoft.dotnet.ilcompiler.8.0.15.nupkg.sha512",
+    "/home/ricardo/.nuget/packages/microsoft.extensions.dependencyinjection.abstractions/8.0.2/microsoft.extensions.dependencyinjection.abstractions.8.0.2.nupkg.sha512",
+    "/home/ricardo/.nuget/packages/microsoft.extensions.logging.abstractions/8.0.2/microsoft.extensions.logging.abstractions.8.0.2.nupkg.sha512",
+    "/home/ricardo/.nuget/packages/microsoft.net.illink.tasks/8.0.15/microsoft.net.illink.tasks.8.0.15.nupkg.sha512",
+    "/home/ricardo/.nuget/packages/npgsql/9.0.3/npgsql.9.0.3.nupkg.sha512",
+    "/home/ricardo/.nuget/packages/runtime.linux-x64.microsoft.dotnet.ilcompiler/8.0.15/runtime.linux-x64.microsoft.dotnet.ilcompiler.8.0.15.nupkg.sha512"
+  ],
+  "logs": []
+}
