@@ -1,15 +1,27 @@
 <script setup lang="ts">
-definePageMeta({})
+definePageMeta({});
+function log(val: any) {
+  console.log(val);
+}
 </script>
 
 <template>
-  <div class="page-index">
-  </div>
+  <el-calendar @input="log($event)">
+    <template #date-cell="{ data }">
+      <NuxtLink
+        :to="{ name: 'linha-producao', query: { dia: data.day } }"
+        class="w-full h-full block"
+        :class="data.type"
+      >
+        {{ data.date.getDate() }}
+      </NuxtLink>
+    </template>
+  </el-calendar>
 </template>
 
 <style>
-.page-index {
-  padding-top: 60px;
-  text-align: center;
+.prev-month,
+.next-month {
+  color: gray;
 }
 </style>
