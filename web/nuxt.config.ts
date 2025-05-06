@@ -1,12 +1,12 @@
 // https://v3.nuxtjs.org/docs/directory-structure/nuxt.config
 export default defineNuxtConfig({
   modules: [
-    '@nuxt/eslint',
-    '@vueuse/nuxt',
-    '@pinia/nuxt',
-    '@element-plus/nuxt',
-    '@nuxtjs/color-mode',
-    '@nuxtjs/tailwindcss',
+    "@nuxt/eslint",
+    "@vueuse/nuxt",
+    "@pinia/nuxt",
+    "@element-plus/nuxt",
+    "@nuxtjs/color-mode",
+    "@nuxtjs/tailwindcss",
   ],
 
   devtools: {
@@ -16,22 +16,20 @@ export default defineNuxtConfig({
   app: {
     // head
     head: {
-      title: 'Gambito Web',
+      title: "Gambito Web",
       meta: [
-        { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+        { name: "viewport", content: "width=device-width, initial-scale=1" },
         {
-          name: 'description',
-          content: 'Gambito Web',
+          name: "description",
+          content: "Gambito Web",
         },
       ],
-      link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }],
-    }
+      link: [{ rel: "icon", type: "image/x-icon", href: "/favicon.ico" }],
+    },
   },
 
   // css
-  css: [
-    '~/assets/css/index.css'
-  ],
+  css: ["~/assets/css/index.css"],
 
   // vueuse
   vueuse: {
@@ -40,7 +38,7 @@ export default defineNuxtConfig({
 
   // colorMode
   colorMode: {
-    classSuffix: '',
+    classSuffix: "",
   },
 
   future: {
@@ -55,12 +53,12 @@ export default defineNuxtConfig({
     typedPages: true,
   },
 
-  compatibilityDate: '2024-08-14',
+  compatibilityDate: "2024-08-14",
 
   nitro: {
     esbuild: {
       options: {
-        target: 'esnext',
+        target: "esnext",
       },
     },
     // prerender: {
@@ -71,9 +69,10 @@ export default defineNuxtConfig({
   },
 
   elementPlus: {
-    icon: 'ElIcon',
-    importStyle: 'css',
-    themes: ['dark'],
-    defaultLocale: 'pt-br'
+    icon: "ElIcon",
+    importStyle: "css",
+    themes: ["dark"],
+    defaultLocale: "pt-br",
   },
-})
+});
+

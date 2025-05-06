@@ -2,7 +2,7 @@
   "version": 3,
   "targets": {
     "net8.0": {
-      "Microsoft.DotNet.ILCompiler/8.0.15": {
+      "Microsoft.DotNet.ILCompiler/8.0.14": {
         "type": "package",
         "build": {
           "build/Microsoft.DotNet.ILCompiler.props": {}
@@ -43,7 +43,7 @@
           "buildTransitive/net6.0/Microsoft.Extensions.Logging.Abstractions.targets": {}
         }
       },
-      "Microsoft.NET.ILLink.Tasks/8.0.15": {
+      "Microsoft.NET.ILLink.Tasks/8.0.14": {
         "type": "package",
         "build": {
           "build/Microsoft.NET.ILLink.Tasks.props": {}
@@ -68,10 +68,10 @@
     }
   },
   "libraries": {
-    "Microsoft.DotNet.ILCompiler/8.0.15": {
-      "sha512": "wMf2N7fJ846aKd73R5gqvtbyqu89/LywlWCtMyXUqKYc9DR3s9kUgNrLIsT9KeRwyinGFJDtRbiib0M4YBX6ZA==",
+    "Microsoft.DotNet.ILCompiler/8.0.14": {
+      "sha512": "lJvndCQZJxHBVoD8VxfSJ2MaURHENC63sbeAJNfedvXvscgjQSpfVdcTsv0iGeSu9X05G05TYMCWVbZGj4Z51Q==",
       "type": "package",
-      "path": "microsoft.dotnet.ilcompiler/8.0.15",
+      "path": "microsoft.dotnet.ilcompiler/8.0.14",
       "hasTools": true,
       "files": [
         ".nupkg.metadata",
@@ -90,7 +90,7 @@
         "build/NativeAOT.natvis",
         "build/WindowsAPIs.txt",
         "build/findvcvarsall.bat",
-        "microsoft.dotnet.ilcompiler.8.0.15.nupkg.sha512",
+        "microsoft.dotnet.ilcompiler.8.0.14.nupkg.sha512",
         "microsoft.dotnet.ilcompiler.nuspec",
         "runtime.json",
         "tools/netstandard/ILCompiler.Build.Tasks.deps.json",
@@ -203,10 +203,10 @@
         "useSharedDesignerContext.txt"
       ]
     },
-    "Microsoft.NET.ILLink.Tasks/8.0.15": {
-      "sha512": "s4eXlcRGyHeCgFUGQnhq0e/SCHBPp0jOHgMqZg3fQ2OCHJSm1aOUhI6RFWuVIcEb9ig2WgI2kWukk8wu72EbUQ==",
+    "Microsoft.NET.ILLink.Tasks/8.0.14": {
+      "sha512": "4U2fd7PexNKrK5ZqfqIcXZj9/lRRjFsLgA/pxuFQTuGQuLYP/+7yACz/j7EmWbEj/fspOf4mafi/vHIy/rKDzQ==",
       "type": "package",
-      "path": "microsoft.net.illink.tasks/8.0.15",
+      "path": "microsoft.net.illink.tasks/8.0.14",
       "hasTools": true,
       "files": [
         ".nupkg.metadata",
@@ -220,7 +220,7 @@
         "build/Microsoft.NET.ILLink.Analyzers.props",
         "build/Microsoft.NET.ILLink.Tasks.props",
         "build/Microsoft.NET.ILLink.targets",
-        "microsoft.net.illink.tasks.8.0.15.nupkg.sha512",
+        "microsoft.net.illink.tasks.8.0.14.nupkg.sha512",
         "microsoft.net.illink.tasks.nuspec",
         "tools/net472/ILLink.Tasks.dll",
         "tools/net472/ILLink.Tasks.dll.config",
@@ -274,25 +274,25 @@
   },
   "projectFileDependencyGroups": {
     "net8.0": [
-      "Microsoft.DotNet.ILCompiler >= 8.0.15",
-      "Microsoft.NET.ILLink.Tasks >= 8.0.15",
+      "Microsoft.DotNet.ILCompiler >= 8.0.14",
+      "Microsoft.NET.ILLink.Tasks >= 8.0.14",
       "Npgsql >= 9.0.3"
     ]
   },
   "packageFolders": {
-    "/home/ricardo/.nuget/packages/": {}
+    "/home/nino/.nuget/packages/": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/home/ricardo/Projects/gambito/gambito-server/gambito-server.csproj",
+      "projectUniqueName": "/home/nino/Projects/gambito/server/gambito-server.csproj",
       "projectName": "gambito-server",
-      "projectPath": "/home/ricardo/Projects/gambito/gambito-server/gambito-server.csproj",
-      "packagesPath": "/home/ricardo/.nuget/packages/",
-      "outputPath": "/home/ricardo/Projects/gambito/gambito-server/obj/",
+      "projectPath": "/home/nino/Projects/gambito/server/gambito-server.csproj",
+      "packagesPath": "/home/nino/.nuget/packages/",
+      "outputPath": "/home/nino/Projects/gambito/server/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "/home/ricardo/.nuget/NuGet/NuGet.Config"
+        "/home/nino/.nuget/NuGet/NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net8.0"
@@ -319,13 +319,13 @@
           "Microsoft.DotNet.ILCompiler": {
             "suppressParent": "All",
             "target": "Package",
-            "version": "[8.0.15, )",
+            "version": "[8.0.14, )",
             "autoReferenced": true
           },
           "Microsoft.NET.ILLink.Tasks": {
             "suppressParent": "All",
             "target": "Package",
-            "version": "[8.0.15, )",
+            "version": "[8.0.14, )",
             "autoReferenced": true
           },
           "Npgsql": {
@@ -347,7 +347,7 @@
         "downloadDependencies": [
           {
             "name": "runtime.linux-x64.Microsoft.DotNet.ILCompiler",
-            "version": "[8.0.15, 8.0.15]"
+            "version": "[8.0.14, 8.0.14]"
           }
         ],
         "frameworkReferences": {
@@ -358,7 +358,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "/usr/lib/dotnet/sdk/8.0.115/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "/usr/lib64/dotnet/sdk/8.0.114/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

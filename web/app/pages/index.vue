@@ -9,7 +9,7 @@ function log(val: any) {
   <el-calendar @input="log($event)">
     <template #date-cell="{ data }">
       <NuxtLink
-        :to="{ name: 'linha-producao', query: { dia: data.day } }"
+        :to="{ name: 'dia-dia', params: { dia: data.day } }"
         class="w-full h-full block"
         :class="data.type"
       >

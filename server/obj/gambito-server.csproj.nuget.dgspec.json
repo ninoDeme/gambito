@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "/home/ricardo/Projects/gambito/gambito-server/gambito-server.csproj": {}
+    "/home/nino/Projects/gambito/server/gambito-server.csproj": {}
   },
   "projects": {
-    "/home/ricardo/Projects/gambito/gambito-server/gambito-server.csproj": {
+    "/home/nino/Projects/gambito/server/gambito-server.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/home/ricardo/Projects/gambito/gambito-server/gambito-server.csproj",
+        "projectUniqueName": "/home/nino/Projects/gambito/server/gambito-server.csproj",
         "projectName": "gambito-server",
-        "projectPath": "/home/ricardo/Projects/gambito/gambito-server/gambito-server.csproj",
-        "packagesPath": "/home/ricardo/.nuget/packages/",
-        "outputPath": "/home/ricardo/Projects/gambito/gambito-server/obj/",
+        "projectPath": "/home/nino/Projects/gambito/server/gambito-server.csproj",
+        "packagesPath": "/home/nino/.nuget/packages/",
+        "outputPath": "/home/nino/Projects/gambito/server/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/home/ricardo/.nuget/NuGet/NuGet.Config"
+          "/home/nino/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
@@ -41,13 +41,13 @@
             "Microsoft.DotNet.ILCompiler": {
               "suppressParent": "All",
               "target": "Package",
-              "version": "[8.0.15, )",
+              "version": "[8.0.14, )",
               "autoReferenced": true
             },
             "Microsoft.NET.ILLink.Tasks": {
               "suppressParent": "All",
               "target": "Package",
-              "version": "[8.0.15, )",
+              "version": "[8.0.14, )",
               "autoReferenced": true
             },
             "Npgsql": {
@@ -69,7 +69,7 @@
           "downloadDependencies": [
             {
               "name": "runtime.linux-x64.Microsoft.DotNet.ILCompiler",
-              "version": "[8.0.15, 8.0.15]"
+              "version": "[8.0.14, 8.0.14]"
             }
           ],
           "frameworkReferences": {
@@ -80,7 +80,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/lib/dotnet/sdk/8.0.115/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/lib64/dotnet/sdk/8.0.114/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
