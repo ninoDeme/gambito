@@ -1,27 +1,24 @@
 <script setup lang="ts">
+import type { CalendarProps } from "@nuxt/ui";
+
 definePageMeta({});
-function log(val: any) {
-  console.log(val);
-}
+let cal: CalendarProps["ui"] = {
+  cellTrigger: ["rounded-none w-full h-full"],
+  cell: ["rounded-none border w-full h-full min-w-auto"],
+};
 </script>
 
 <template>
-  <el-calendar @input="log($event)">
-    <template #date-cell="{ data }">
-      <NuxtLink
-        :to="{ name: 'dia-dia', params: { dia: data.day } }"
-        class="w-full h-full block"
-        :class="data.type"
+  <UCalendar :ui="cal" size="xl">
+    <template #day="{ day }">
+      <NuxtLinkLocale
+        :to="{ name: 'dia-dia', params: { dia: day.toString() } }"
+        class="w-full h-full block p-8"
       >
-        {{ data.date.getDate() }}
-      </NuxtLink>
+        {{ day.day }}
+      </NuxtLinkLocale>
     </template>
-  </el-calendar>
+  </UCalendar>
 </template>
 
-<style>
-.prev-month,
-.next-month {
-  color: gray;
-}
-</style>
+<style></style>

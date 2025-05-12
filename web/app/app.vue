@@ -1,17 +1,18 @@
 <script setup lang="ts">
 import { appName } from "~/constants";
+import * as locales from '@nuxt/ui/locale'
+
+const { locale } = useI18n()
 
 useHead({
   title: appName,
 });
 
-import dayjs from "dayjs";
-import "dayjs/locale/pt-br";
-
-dayjs.locale("pt-br");
 </script>
 <template>
-  <NuxtLayout>
-    <NuxtPage />
-  </NuxtLayout>
+  <UApp :locale="locales[locale]">
+    <NuxtLayout>
+      <NuxtPage />
+    </NuxtLayout>
+  </UApp>
 </template>

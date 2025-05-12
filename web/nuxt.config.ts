@@ -2,12 +2,23 @@
 export default defineNuxtConfig({
   modules: [
     "@nuxt/eslint",
+    "@nuxt/ui",
     "@vueuse/nuxt",
     "@pinia/nuxt",
-    "@element-plus/nuxt",
     "@nuxtjs/color-mode",
-    "@nuxtjs/tailwindcss",
+    "@nuxt/fonts",
+    "@nuxt/icon",
+    "@nuxtjs/i18n",
   ],
+
+  i18n: {
+    defaultLocale: 'pt_br',
+    locales: [
+      { code: 'en', name: 'English', file: 'en.json' },
+      { code: 'pt_br', name: 'Português', file: 'pt_br.json' },
+      { code: 'es', name: 'Español', file: 'es.json' },
+    ]
+  },
 
   devtools: {
     enabled: true,
@@ -67,12 +78,4 @@ export default defineNuxtConfig({
     //   ignore: ['/hi'],
     // },
   },
-
-  elementPlus: {
-    icon: "ElIcon",
-    importStyle: "css",
-    themes: ["dark"],
-    defaultLocale: "pt-br",
-  },
 });
-
