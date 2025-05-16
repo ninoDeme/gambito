@@ -1,14 +1,16 @@
 <script setup lang="ts">
-import { NuxtLinkLocale, UBadge, UButton } from "#components";
+import { UButton } from "#components";
 import { parseDate } from "@internationalized/date";
 import type { TableColumn } from "@nuxt/ui";
-import { Fragment } from "vue/jsx-runtime";
-const route = useRoute("dia-dia___pt_br");
+
+const localePath = useLocalePath();
+const localeRoute = useLocaleRoute();
+
+const route = localeRoute('dia-dia')!;
 const diaAtual = parseDate(route.params.dia);
 const { data, status, error, refresh, clear } = await useFetch(
   `/api/dia/${diaAtual}`,
 );
-const localePath = useLocalePath();
 
 const columns: TableColumn<{
   id: number;
