@@ -6,7 +6,7 @@ import type { TableColumn } from "@nuxt/ui";
 const localePath = useLocalePath();
 const localeRoute = useLocaleRoute();
 
-const route = localeRoute('dia-dia')!;
+const route = localeRoute("controle-de-producao-dia-dia")!;
 const diaAtual = parseDate(route.params.dia);
 const { data, status, error, refresh, clear } = await useFetch(
   `/api/dia/${diaAtual}`,
@@ -25,7 +25,7 @@ const columns: TableColumn<{
     cell: ({ row }) =>
       h(UButton, {
         to: localePath({
-          name: "linha-producao",
+          name: "controle-de-producao-linha-producao",
           params: { codigo: row.getValue("id") },
         }),
         label: "Editar",
@@ -56,7 +56,6 @@ const columns: TableColumn<{
 const table = useTemplateRef("table");
 </script>
 <template>
-  <div>{{ diaAtual?.toString() }}</div>
   <div class="flex-1 divide-y divide-accented w-full">
     <div class="flex items-center gap-2 px-4 py-3.5 overflow-x-auto">
       <UInput
@@ -109,7 +108,7 @@ const table = useTemplateRef("table");
       :data="data"
       :columns="columns"
       sticky
-      class="h-96"
+      class="h-96 text-start"
       :loading="status === 'pending'"
     >
     </UTable>

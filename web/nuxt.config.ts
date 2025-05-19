@@ -50,6 +50,7 @@ export default defineNuxtConfig({
   // colorMode
   colorMode: {
     classSuffix: "",
+    storage: 'cookie'
   },
 
   future: {
