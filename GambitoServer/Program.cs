@@ -1,51 +1,133 @@
 using System.Text.Json.Serialization;
-using GambitoServer;
-using Microsoft.EntityFrameworkCore;
+using Dapper;
+using Npgsql;
 
-var builder = WebApplication.CreateSlimBuilder(args);
+using Microsoft.FluentUI.AspNetCore.Components;
+using GambitoServer.Components;
+
+// [module:DapperAot]
+
+// var builder = WebApplication.CreateSlimBuilder(args);
+var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.ConfigureHttpJsonOptions(options =>
 {
   options.SerializerOptions.TypeInfoResolverChain.Insert(0, AppJsonSerializerContext.Default);
 });
 
-builder.Logging.AddSimpleConsole(c => c.SingleLine = true);
+var ds = NpgsqlDataSource.Create($"Host=localhost:15432;Username=postgres;Password=postgres;Database=gambito");
+builder.Services.AddSingleton(ds);
+// builder.Services.AddControllers();
+builder.Services.AddProblemDetails();
 
-builder.Services.AddDbContext<Db>((sp, options) =>
-{
-  options.UseNpgsql("Host=localhost;Port=15432;Username=postgres;Password=postgres;Database=gambito");
-});
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+
+// Add services to the container.
+builder.Services.AddRazorComponents()
+    .AddInteractiveServerComponents();
+builder.Services.AddFluentUIComponents();
+
+builder.Services.AddResponseCompression();
 
 var app = builder.Build();
-
-
-var sampleTodos = new Todo[] {
-    new(1, "Walk the dog"),
-    new(2, "Do the dishes", DateOnly.FromDateTime(DateTime.Now)),
-    new(3, "Do the laundry", DateOnly.FromDateTime(DateTime.Now.AddDays(1))),
-    new(4, "Clean the bathroom"),
-    new(5, "Clean the car", DateOnly.FromDateTime(DateTime.Now.AddDays(2)))
-};
-
-var todosApi = app.MapGroup("/todos");
-todosApi.MapGet("/", () => sampleTodos);
-todosApi.MapGet("/{id}", (int id) =>
-    sampleTodos.FirstOrDefault(a => a.Id == id) is { } todo
-        ? Results.Ok(todo)
-        : Results.NotFound());
-
 await using var scope = app.Services.CreateAsyncScope();
-var db = scope.ServiceProvider.GetRequiredService<Db>();
-var canConnect = await db.Database.CanConnectAsync();
-app.Logger.LogInformation("Can connect to database: {CanConnect}", canConnect);
+
+app.UseResponseCompression();
+
+app.UseAntiforgery();
+
+app.MapStaticAssets();
+app.MapRazorComponents<App>()
+    .AddInteractiveServerRenderMode();
+
+if (!app.Environment.IsDevelopment())
+{
+
+  app.UseExceptionHandler("/Error", createScopeForErrors: true);
+  // app.UseExceptionHandler(exceptionHandlerApp
+  //     => exceptionHandlerApp.Run(async context
+  //       => await Results.Problem()
+  //       .ExecuteAsync(context)));
+  app.UseHsts();
+}
+
+app.UseStatusCodePages();
+
+var router = app.MapGroup("/api");
+
+// router.MapControllers();
+
+LinhaProducaoMinimalController.Register(router);
 
 app.Run();
 
-public record Todo(int Id, string? Title, DateOnly? DueBy = null, bool IsComplete = false);
+public class LinhaProducao
+{
+  public required int Id { get; set; }
+  public required string Descricao { get; set; }
+}
 
-[JsonSerializable(typeof(Todo[]))]
+public static class LinhaProducaoMinimalController
+{
+  public static void Register(RouteGroupBuilder router)
+  {
+    var group = router.MapGroup("/linha-producao-m");
+
+    group.MapGet("/", async (NpgsqlDataSource dataSource, HttpContext context) =>
+    {
+      await using var db = await dataSource.OpenConnectionAsync();
+      var res = await db.QueryAsync<LinhaProducao>("SELECT * FROM linha_producao");
+      return res.ToArray();
+    });
+
+    group.MapGet("/{id}", async (int id, NpgsqlDataSource dataSource) =>
+    {
+      await using var db = await dataSource.OpenConnectionAsync();
+      var res = await db.QueryAsync<LinhaProducao>("SELECT * FROM linha_producao WHERE id = @id", new { id });
+      try
+      {
+        return Results.Ok(res.First());
+      }
+      catch (Exception)
+      {
+        return Results.NotFound();
+      }
+    });
+  }
+}
+
+// [ApiController]
+// [Route("/linha-producao")]
+// public class LinhaProducaoController : ControllerBase
+// {
+//   [HttpGet("")]
+//   public async Task<List<LinhaProducao>> GetAll(NpgsqlDataSource dataSource)
+//   {
+//     await using var db = await dataSource.OpenConnectionAsync();
+//     var res = await db.QueryAsync<LinhaProducao>("SELECT * FROM linha_producao");
+//     return res.ToList();
+//   }
+//
+//   [HttpGet("{id}")]
+//   public async Task<IResult> Get(int id, NpgsqlDataSource dataSource)
+//   {
+//     await using var db = await dataSource.OpenConnectionAsync();
+//     var res = await db.QueryAsync<LinhaProducao>("SELECT * FROM linha_producao WHERE id = @id", new { id });
+//     try
+//     {
+//       return Results.Ok(res.First());
+//     }
+//     catch (Exception)
+//     {
+//       return Results.NotFound();
+//     }
+//   }
+// }
+
+[JsonSerializable(typeof(LinhaProducao))]
+[JsonSerializable(typeof(LinhaProducao[]))]
 internal partial class AppJsonSerializerContext : JsonSerializerContext
 {
 
 }
-
