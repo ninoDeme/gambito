@@ -4,7 +4,6 @@
     <TargetFramework>net9.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <InvariantGlobalization>true</InvariantGlobalization>
     <PublishAot>false</PublishAot>
     <IsAotCompatible>false</IsAotCompatible>
     <!-- <InterceptorsPreviewNamespaces>$(InterceptorsPreviewNamespaces);Dapper.AOT</InterceptorsPreviewNamespaces> -->
@@ -15,11 +14,9 @@
 
   <ItemGroup>
     <PackageReference Include="Dapper" Version="2.1.66" />
+    <PackageReference Include="Microsoft.Extensions.Localization" Version="9.0.5" />
     <!-- <PackageReference Include="Dapper.AOT" Version="1.0.48" /> -->
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
-
-    <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components" Version="4.11.9" />
-    <PackageReference Include="Microsoft.FluentUI.AspNetCore.Components.Icons" Version="4.11.9" />
   </ItemGroup>
 
 </Project>

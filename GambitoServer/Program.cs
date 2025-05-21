@@ -2,9 +2,6 @@ using System.Text.Json.Serialization;
 using Dapper;
 using Npgsql;
 
-using Microsoft.FluentUI.AspNetCore.Components;
-using GambitoServer.Components;
-
 // [module:DapperAot]
 
 // var builder = WebApplication.CreateSlimBuilder(args);
@@ -15,48 +12,56 @@ builder.Services.ConfigureHttpJsonOptions(options =>
   options.SerializerOptions.TypeInfoResolverChain.Insert(0, AppJsonSerializerContext.Default);
 });
 
+// Register database
 var ds = NpgsqlDataSource.Create($"Host=localhost:15432;Username=postgres;Password=postgres;Database=gambito");
 builder.Services.AddSingleton(ds);
+
 // builder.Services.AddControllers();
 builder.Services.AddProblemDetails();
 
+// Localization
+builder.Services.AddLocalization();
+
+// Logging
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
-
-// Add services to the container.
-builder.Services.AddRazorComponents()
-    .AddInteractiveServerComponents();
-builder.Services.AddFluentUIComponents();
 
 builder.Services.AddResponseCompression();
 
 var app = builder.Build();
 await using var scope = app.Services.CreateAsyncScope();
 
+app.UseStatusCodePages();
+
 app.UseResponseCompression();
+
+var supportedCultures = new[] { "pt-BR", "es-419", "en-US", };
+var localizationOptions = new RequestLocalizationOptions()
+    .SetDefaultCulture(supportedCultures[0])
+    .AddSupportedCultures(supportedCultures)
+    .AddSupportedUICultures(supportedCultures);
+app.UseRequestLocalization();
 
 app.UseAntiforgery();
 
-app.MapStaticAssets();
-app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode();
-
 if (!app.Environment.IsDevelopment())
 {
-
   app.UseExceptionHandler("/Error", createScopeForErrors: true);
   // app.UseExceptionHandler(exceptionHandlerApp
   //     => exceptionHandlerApp.Run(async context
   //       => await Results.Problem()
   //       .ExecuteAsync(context)));
   app.UseHsts();
+  app.UseResponseCompression();
 }
 
-app.UseStatusCodePages();
+app.MapStaticAssets();
+app.MapRazorComponents<App>()
+    .AddInteractiveServerRenderMode();
 
 var router = app.MapGroup("/api");
 
-// router.MapControllers();
+// app.MapControllers();
 
 LinhaProducaoMinimalController.Register(router);
 
@@ -98,7 +103,7 @@ public static class LinhaProducaoMinimalController
 }
 
 // [ApiController]
-// [Route("/linha-producao")]
+// [Route("api/linha-producao")]
 // public class LinhaProducaoController : ControllerBase
 // {
 //   [HttpGet("")]
