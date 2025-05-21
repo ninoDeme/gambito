@@ -1,5 +1,7 @@
 using System.Text.Json.Serialization;
 using Dapper;
+using GambitoServer.GambitoContext;
+using Microsoft.EntityFrameworkCore;
 using Npgsql;
 
 // [module:DapperAot]
@@ -14,6 +16,11 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 
 // Register database
 var ds = NpgsqlDataSource.Create($"Host=localhost:15432;Username=postgres;Password=postgres;Database=gambito");
+
+builder.Services.AddDbContext<GambitoContext>(options => options.UseNpgsql(
+    "Host=localhost:15432;Username=postgres;Password=postgres;Database=gambito",
+    o => o.MapEnum<TipoHora>("tipo_hora")));
+
 builder.Services.AddSingleton(ds);
 
 // builder.Services.AddControllers();
@@ -56,8 +63,6 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.MapStaticAssets();
-app.MapRazorComponents<App>()
-    .AddInteractiveServerRenderMode();
 
 var router = app.MapGroup("/api");
 
@@ -136,3 +141,10 @@ internal partial class AppJsonSerializerContext : JsonSerializerContext
 {
 
 }
+
+public enum TipoHora
+{
+  HORA_EXTRA,
+  BANCO_HORAS
+};
+
