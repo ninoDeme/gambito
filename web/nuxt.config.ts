@@ -9,6 +9,7 @@ export default defineNuxtConfig({
     "@nuxt/fonts",
     "@nuxt/icon",
     "@nuxtjs/i18n",
+    "@nuxtjs/supabase",
   ],
 
   i18n: {
