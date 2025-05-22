@@ -4,6 +4,7 @@ using GambitoServer.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Npgsql;
+using NuGet.Protocol;
 
 // var builder = WebApplication.CreateSlimBuilder(args);
 var builder = WebApplication.CreateBuilder(args);
@@ -13,6 +14,8 @@ builder.Services.AddDbContext<GambitoIdentityContext>();
 
 builder.Services.AddControllers();
 builder.Services.AddProblemDetails();
+
+builder.Services.AddAntiforgery();
 
 // Localization
 builder.Services.AddLocalization();
@@ -45,8 +48,6 @@ var localizationOptions = new RequestLocalizationOptions()
     .AddSupportedUICultures(supportedCultures);
 app.UseRequestLocalization();
 
-app.UseAntiforgery();
-
 if (app.Environment.IsDevelopment())
 {
   app.UseSwagger();
@@ -62,49 +63,50 @@ else
         .ExecuteAsync(context)));
   app.UseHsts();
   app.UseResponseCompression();
+  app.UseAntiforgery();
 }
 
 app.UseAuthorization();
 app.UseAuthentication();
 
-app.MapIdentityApi<User>();
+app.MapGroup("api/auth").MapIdentityApi<User>();
 
 var router = app.MapGroup("/api");
 
 app.MapControllers();
 
-LinhaProducaoMinimalController.Register(router);
+// LinhaProducaoMinimalController.Register(router);
 
 app.Run();
 
-public static class LinhaProducaoMinimalController
-{
-  public static void Register(RouteGroupBuilder router)
-  {
-    var group = router.MapGroup("/linha-producao-m");
-
-    group.MapGet("/", async (NpgsqlDataSource dataSource, HttpContext context) =>
-    {
-      await using var db = await dataSource.OpenConnectionAsync();
-      var res = await db.QueryAsync<LinhaProducao>("SELECT * FROM linha_producao");
-      return res.ToArray();
-    });
-
-    group.MapGet("/{id}", async (int id, NpgsqlDataSource dataSource) =>
-    {
-      await using var db = await dataSource.OpenConnectionAsync();
-      var res = await db.QueryAsync<LinhaProducao>("SELECT * FROM linha_producao WHERE id = @id", new { id });
-      try
-      {
-        return Results.Ok(res.First());
-      }
-      catch (Exception)
-      {
-        return Results.NotFound();
-      }
-    });
-  }
-}
+// public static class LinhaProducaoMinimalController
+// {
+//   public static void Register(RouteGroupBuilder router)
+//   {
+//     var group = router.MapGroup("/linha-producao-m");
+//
+//     group.MapGet("/", async (NpgsqlDataSource dataSource, HttpContext context) =>
+//     {
+//       await using var db = await dataSource.OpenConnectionAsync();
+//       var res = await db.QueryAsync<LinhaProducao>("SELECT * FROM linha_producao");
+//       return res.ToArray();
+//     });
+//
+//     group.MapGet("/{id}", async (int id, NpgsqlDataSource dataSource) =>
+//     {
+//       await using var db = await dataSource.OpenConnectionAsync();
+//       var res = await db.QueryAsync<LinhaProducao>("SELECT * FROM linha_producao WHERE id = @id", new { id });
+//       try
+//       {
+//         return Results.Ok(res.First());
+//       }
+//       catch (Exception)
+//       {
+//         return Results.NotFound();
+//       }
+//     });
+//   }
+// }
 
 [ApiController]
 [Route("api/linha-producao")]
@@ -118,18 +120,21 @@ public class LinhaProducaoController : ControllerBase
   }
 
   [HttpGet("{id}")]
-  public async Task<IResult> Get(int id, NpgsqlDataSource dataSource)
+  public async Task<IResult> Get(int id, GambitoContext dataSource)
   {
-    await using var db = await dataSource.OpenConnectionAsync();
-    var res = await db.QueryAsync<LinhaProducao>("SELECT * FROM linha_producao WHERE id = @id", new { id });
-    try
-    {
-      return Results.Ok(res.First());
-    }
-    catch (Exception)
+    var res = await dataSource.LinhaProducaos.FindAsync(id);
+    if (res is null)
     {
       return Results.NotFound();
     }
+    return Results.Ok(res);
+  }
+
+  [HttpPost]
+  public async Task<IResult> Set(LinhaProducao body, GambitoContext db)
+  {
+    var res = await db.LinhaProducaos.AddAsync(body);
+    return Results.Ok(res.CurrentValues.ToJson());
   }
 }
 
