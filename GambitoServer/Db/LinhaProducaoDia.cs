@@ -1,6 +1,6 @@
-﻿namespace GambitoServer.GambitoContext;
+﻿namespace GambitoServer.Db;
 
-public partial class LinhaProducaoDium
+public partial class LinhaProducaoDia
 {
     public int LinhaProducao { get; set; }
 

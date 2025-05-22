@@ -1,23 +1,15 @@
 using Dapper;
-using GambitoServer.GambitoContext;
-using GambitoServer.GambitoIdentityContext;
+using GambitoServer.Db;
+using GambitoServer.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Npgsql;
-
-// [module:DapperAot]
 
 // var builder = WebApplication.CreateSlimBuilder(args);
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddDbContext<GambitoContext>(options => options.UseNpgsql(
-    "Host=localhost:15432;Username=postgres;Password=postgres;Database=gambito",
-    o => o.MapEnum<TipoHora>("tipo_hora")));
-
-builder.Services.AddDbContext<GambitoIdentityContext>(options => options.UseNpgsql(
-    "Host=localhost:15432;Username=postgres;Password=postgres;Database=identity",
-    o => { }));
+builder.Services.AddDbContext<GambitoContext>();
+builder.Services.AddDbContext<GambitoIdentityContext>();
 
 builder.Services.AddControllers();
 builder.Services.AddProblemDetails();
@@ -140,10 +132,4 @@ public class LinhaProducaoController : ControllerBase
     }
   }
 }
-
-public enum TipoHora
-{
-  HORA_EXTRA,
-  BANCO_HORAS
-};
 

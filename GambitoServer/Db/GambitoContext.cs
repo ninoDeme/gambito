@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 
-namespace GambitoServer.GambitoContext;
+namespace GambitoServer.Db;
 
 public partial class GambitoContext : DbContext
 {
@@ -23,7 +23,7 @@ public partial class GambitoContext : DbContext
 
   public virtual DbSet<LinhaProducao> LinhaProducaos { get; set; }
 
-  public virtual DbSet<LinhaProducaoDium> LinhaProducaoDia { get; set; }
+  public virtual DbSet<LinhaProducaoDia> LinhaProducaoDia { get; set; }
 
   public virtual DbSet<LinhaProducaoHora> LinhaProducaoHoras { get; set; }
 
@@ -35,10 +35,15 @@ public partial class GambitoContext : DbContext
 
   public virtual DbSet<Produto> Produtos { get; set; }
 
+  protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+  {
+    optionsBuilder
+      .UseNpgsql("Host=localhost:15432;Username=postgres;Password=postgres;Database=gambito", o => o.MapEnum<TipoHora>("tipo_hora"))
+      .UseSnakeCaseNamingConvention();
+  }
+
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {
-    modelBuilder.HasPostgresEnum("tipo_hora", new[] { "HORA_EXTRA", "BANCO_HORAS" });
-
     modelBuilder.Entity<Defeito>(entity =>
     {
       entity.HasKey(e => e.Id).HasName("defeito_pkey");
@@ -48,11 +53,9 @@ public partial class GambitoContext : DbContext
       entity.HasIndex(e => e.Nome, "defeito_nome_key").IsUnique();
 
       entity.Property(e => e.Id)
-              .UseIdentityAlwaysColumn()
-              .HasColumnName("id");
+              .UseIdentityAlwaysColumn();
       entity.Property(e => e.Nome)
-              .HasMaxLength(50)
-              .HasColumnName("nome");
+              .HasMaxLength(50);
     });
 
     modelBuilder.Entity<Etapa>(entity =>
@@ -62,11 +65,9 @@ public partial class GambitoContext : DbContext
       entity.ToTable("etapa");
 
       entity.Property(e => e.Id)
-              .UseIdentityAlwaysColumn()
-              .HasColumnName("id");
+              .UseIdentityAlwaysColumn();
       entity.Property(e => e.Nome)
-              .HasMaxLength(100)
-              .HasColumnName("nome");
+              .HasMaxLength(100);
     });
 
     modelBuilder.Entity<Funcao>(entity =>
@@ -78,11 +79,9 @@ public partial class GambitoContext : DbContext
       entity.HasIndex(e => e.Nome, "funcao_nome_key").IsUnique();
 
       entity.Property(e => e.Id)
-              .UseIdentityAlwaysColumn()
-              .HasColumnName("id");
+              .UseIdentityAlwaysColumn();
       entity.Property(e => e.Nome)
-              .HasMaxLength(100)
-              .HasColumnName("nome");
+              .HasMaxLength(100);
     });
 
     modelBuilder.Entity<Funcionario>(entity =>
@@ -92,16 +91,13 @@ public partial class GambitoContext : DbContext
       entity.ToTable("funcionario");
 
       entity.Property(e => e.Id)
-              .UseIdentityAlwaysColumn()
-              .HasColumnName("id");
-      entity.Property(e => e.Encarregado).HasColumnName("encarregado");
-      entity.Property(e => e.Funcao).HasColumnName("funcao");
+              .UseIdentityAlwaysColumn();
+      entity.Property(e => e.Encarregado);
+      entity.Property(e => e.Funcao);
       entity.Property(e => e.Invativo)
-              .HasDefaultValue(false)
-              .HasColumnName("invativo");
+              .HasDefaultValue(false);
       entity.Property(e => e.Nome)
-              .HasMaxLength(100)
-              .HasColumnName("nome");
+              .HasMaxLength(100);
 
       entity.HasOne(d => d.EncarregadoNavigation).WithMany(p => p.InverseEncarregadoNavigation)
               .HasForeignKey(d => d.Encarregado)
@@ -119,22 +115,20 @@ public partial class GambitoContext : DbContext
       entity.ToTable("linha_producao");
 
       entity.Property(e => e.Id)
-              .UseIdentityAlwaysColumn()
-              .HasColumnName("id");
-      entity.Property(e => e.Descricao).HasColumnName("descricao");
+              .UseIdentityAlwaysColumn();
+      entity.Property(e => e.Descricao);
     });
 
-    modelBuilder.Entity<LinhaProducaoDium>(entity =>
+    modelBuilder.Entity<LinhaProducaoDia>(entity =>
     {
       entity.HasKey(e => new { e.LinhaProducao, e.Data }).HasName("linha_producao_dia_pkey");
 
       entity.ToTable("linha_producao_dia");
 
-      entity.Property(e => e.LinhaProducao).HasColumnName("linha_producao");
-      entity.Property(e => e.Data).HasColumnName("data");
+      entity.Property(e => e.LinhaProducao);
+      entity.Property(e => e.Data);
       entity.Property(e => e.Invativo)
-              .HasDefaultValue(false)
-              .HasColumnName("invativo");
+              .HasDefaultValue(false);
 
       entity.HasOne(d => d.LinhaProducaoNavigation).WithMany(p => p.LinhaProducaoDia)
               .HasForeignKey(d => d.LinhaProducao)
@@ -149,25 +143,18 @@ public partial class GambitoContext : DbContext
       entity.ToTable("linha_producao_hora");
 
       entity.Property(e => e.Id)
-              .UseIdentityAlwaysColumn()
-              .HasColumnName("id");
-      entity.Property(e => e.Data).HasColumnName("data");
-      entity.Property(e => e.Hora).HasColumnName("hora");
-      entity.Property(e => e.HoraFim).HasColumnName("hora_fim");
-      entity.Property(e => e.HoraIni).HasColumnName("hora_ini");
-      entity.Property(e => e.LinhaProducao).HasColumnName("linha_producao");
+              .UseIdentityAlwaysColumn();
       entity.Property(e => e.Paralizacao)
-              .HasDefaultValue(false)
-              .HasColumnName("paralizacao");
-      entity.Property(e => e.Pedido).HasColumnName("pedido");
-      entity.Property(e => e.QtdProduzido).HasColumnName("qtd_produzido");
+              .HasDefaultValue(false);
+      entity.Property(e => e.Pedido);
+      entity.Property(e => e.QtdProduzido);
 
       entity.HasOne(d => d.PedidoNavigation).WithMany(p => p.LinhaProducaoHoras)
               .HasForeignKey(d => d.Pedido)
-              .OnDelete(DeleteBehavior.ClientSetNull)
+              .OnDelete(DeleteBehavior.ClientNoAction)
               .HasConstraintName("linha_producao_hora_pedido_fkey");
 
-      entity.HasOne(d => d.LinhaProducaoDium).WithMany(p => p.LinhaProducaoHoras)
+      entity.HasOne(d => d.LinhaProducaoDia).WithMany(p => p.LinhaProducaoHoras)
               .HasForeignKey(d => new { d.LinhaProducao, d.Data })
               .HasConstraintName("linha_producao_hora_linha_producao_data_fkey");
     });
@@ -178,10 +165,10 @@ public partial class GambitoContext : DbContext
 
       entity.ToTable("linha_producao_hora_defeito");
 
-      entity.Property(e => e.LinhaProducaoHora).HasColumnName("linha_producao_hora");
-      entity.Property(e => e.Retrabalhado).HasColumnName("retrabalhado");
-      entity.Property(e => e.Defeito).HasColumnName("defeito");
-      entity.Property(e => e.QtdPecas).HasColumnName("qtd_pecas");
+      entity.Property(e => e.LinhaProducaoHora);
+      entity.Property(e => e.Retrabalhado);
+      entity.Property(e => e.Defeito);
+      entity.Property(e => e.QtdPecas);
 
       entity.HasOne(d => d.DefeitoNavigation).WithMany(p => p.LinhaProducaoHoraDefeitos)
               .HasForeignKey(d => d.Defeito)
@@ -201,19 +188,18 @@ public partial class GambitoContext : DbContext
       entity.ToTable("linha_producao_hora_etapa");
 
       entity.Property(e => e.Id)
-              .UseIdentityAlwaysColumn()
-              .HasColumnName("id");
-      entity.Property(e => e.Data).HasColumnName("data");
-      entity.Property(e => e.Etapa).HasColumnName("etapa");
-      entity.Property(e => e.LinhaProducao).HasColumnName("linha_producao");
-      entity.Property(e => e.Ordem).HasColumnName("ordem");
-      entity.Property(e => e.Segundos).HasColumnName("segundos");
+              .UseIdentityAlwaysColumn();
+      entity.Property(e => e.Data);
+      entity.Property(e => e.Etapa);
+      entity.Property(e => e.LinhaProducao);
+      entity.Property(e => e.Ordem);
+      entity.Property(e => e.Segundos);
 
       entity.HasOne(d => d.EtapaNavigation).WithMany(p => p.LinhaProducaoHoraEtapas)
               .HasForeignKey(d => d.Etapa)
               .HasConstraintName("linha_producao_hora_etapa_etapa_fkey");
 
-      entity.HasOne(d => d.LinhaProducaoDium).WithMany(p => p.LinhaProducaoHoraEtapas)
+      entity.HasOne(d => d.LinhaProducaoDia).WithMany(p => p.LinhaProducaoHoraEtapas)
               .HasForeignKey(d => new { d.LinhaProducao, d.Data })
               .HasConstraintName("linha_producao_hora_etapa_linha_producao_data_fkey");
 
@@ -230,11 +216,11 @@ public partial class GambitoContext : DbContext
                       .HasConstraintName("linha_producao_hora_etapa_funcio_linha_producao_hora_etapa_fkey"),
                   j =>
                   {
-                  j.HasKey("LinhaProducaoHoraEtapa", "Funcionario").HasName("linha_producao_hora_etapa_funcionario_pkey");
-                  j.ToTable("linha_producao_hora_etapa_funcionario");
-                  j.IndexerProperty<int>("LinhaProducaoHoraEtapa").HasColumnName("linha_producao_hora_etapa");
-                  j.IndexerProperty<int>("Funcionario").HasColumnName("funcionario");
-                });
+                    j.HasKey("LinhaProducaoHoraEtapa", "Funcionario").HasName("linha_producao_hora_etapa_funcionario_pkey");
+                    j.ToTable("linha_producao_hora_etapa_funcionario");
+                    j.IndexerProperty<int>("LinhaProducaoHoraEtapa");
+                    j.IndexerProperty<int>("Funcionario");
+                  });
     });
 
     modelBuilder.Entity<Pedido>(entity =>
@@ -244,10 +230,9 @@ public partial class GambitoContext : DbContext
       entity.ToTable("pedido");
 
       entity.Property(e => e.Id)
-              .UseIdentityAlwaysColumn()
-              .HasColumnName("id");
-      entity.Property(e => e.Produto).HasColumnName("produto");
-      entity.Property(e => e.QtdPecas).HasColumnName("qtd_pecas");
+              .UseIdentityAlwaysColumn();
+      entity.Property(e => e.Produto);
+      entity.Property(e => e.QtdPecas);
 
       entity.HasOne(d => d.ProdutoNavigation).WithMany(p => p.Pedidos)
               .HasForeignKey(d => d.Produto)
@@ -264,12 +249,10 @@ public partial class GambitoContext : DbContext
       entity.HasIndex(e => e.Nome, "produto_nome_key").IsUnique();
 
       entity.Property(e => e.Id)
-              .UseIdentityAlwaysColumn()
-              .HasColumnName("id");
+              .UseIdentityAlwaysColumn();
       entity.Property(e => e.Nome)
-              .HasMaxLength(100)
-              .HasColumnName("nome");
-      entity.Property(e => e.TempoPeca).HasColumnName("tempo_peca");
+              .HasMaxLength(100);
+      entity.Property(e => e.TempoPeca);
     });
 
     OnModelCreatingPartial(modelBuilder);

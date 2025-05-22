@@ -1,4 +1,4 @@
-﻿namespace GambitoServer.GambitoContext;
+﻿namespace GambitoServer.Db;
 
 public partial class Defeito
 {

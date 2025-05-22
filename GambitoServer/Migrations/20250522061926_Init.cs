@@ -1,4 +1,5 @@
 ﻿using System;
+using GambitoServer.Db;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -7,16 +8,16 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GambitoServer.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class Init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterDatabase()
-                .Annotation("Npgsql:Enum:tipo_hora", "HORA_EXTRA,BANCO_HORAS");
+                .Annotation("Npgsql:Enum:tipo_hora", "banco_horas,hora_extra");
 
             migrationBuilder.CreateTable(
-                name: "defeito",
+                name: "defeitos",
                 columns: table => new
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
@@ -185,7 +186,7 @@ namespace GambitoServer.Migrations
                     paralizacao = table.Column<bool>(type: "boolean", nullable: false, defaultValue: false),
                     hora_ini = table.Column<TimeOnly>(type: "time without time zone", nullable: true),
                     hora_fim = table.Column<TimeOnly>(type: "time without time zone", nullable: true),
-                    Tipo = table.Column<int>(type: "integer", nullable: true)
+                    tipo = table.Column<TipoHora>(type: "tipo_hora", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -239,7 +240,7 @@ namespace GambitoServer.Migrations
                     table.ForeignKey(
                         name: "linha_producao_hora_defeito_defeito_fkey",
                         column: x => x.defeito,
-                        principalTable: "defeito",
+                        principalTable: "defeitos",
                         principalColumn: "id");
                     table.ForeignKey(
                         name: "linha_producao_hora_defeito_linha_producao_hora_fkey",
@@ -249,64 +250,64 @@ namespace GambitoServer.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "defeito_nome_key",
-                table: "defeito",
+                name: "ix_defeitos_nome",
+                table: "defeitos",
                 column: "nome",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "funcao_nome_key",
+                name: "ix_funcao_nome",
                 table: "funcao",
                 column: "nome",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_funcionario_encarregado",
+                name: "ix_funcionario_encarregado",
                 table: "funcionario",
                 column: "encarregado");
 
             migrationBuilder.CreateIndex(
-                name: "IX_funcionario_funcao",
+                name: "ix_funcionario_funcao",
                 table: "funcionario",
                 column: "funcao");
 
             migrationBuilder.CreateIndex(
-                name: "IX_linha_producao_hora_linha_producao_data",
+                name: "ix_linha_producao_hora_linha_producao_data",
                 table: "linha_producao_hora",
                 columns: new[] { "linha_producao", "data" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_linha_producao_hora_pedido",
+                name: "ix_linha_producao_hora_pedido",
                 table: "linha_producao_hora",
                 column: "pedido");
 
             migrationBuilder.CreateIndex(
-                name: "IX_linha_producao_hora_defeito_defeito",
+                name: "ix_linha_producao_hora_defeito_defeito",
                 table: "linha_producao_hora_defeito",
                 column: "defeito");
 
             migrationBuilder.CreateIndex(
-                name: "IX_linha_producao_hora_etapa_etapa",
+                name: "ix_linha_producao_hora_etapa_etapa",
                 table: "linha_producao_hora_etapa",
                 column: "etapa");
 
             migrationBuilder.CreateIndex(
-                name: "IX_linha_producao_hora_etapa_linha_producao_data",
+                name: "ix_linha_producao_hora_etapa_linha_producao_data",
                 table: "linha_producao_hora_etapa",
                 columns: new[] { "linha_producao", "data" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_linha_producao_hora_etapa_funcionario_funcionario",
+                name: "ix_linha_producao_hora_etapa_funcionario_funcionario",
                 table: "linha_producao_hora_etapa_funcionario",
                 column: "funcionario");
 
             migrationBuilder.CreateIndex(
-                name: "IX_pedido_produto",
+                name: "ix_pedido_produto",
                 table: "pedido",
                 column: "produto");
 
             migrationBuilder.CreateIndex(
-                name: "produto_nome_key",
+                name: "ix_produto_nome",
                 table: "produto",
                 column: "nome",
                 unique: true);
@@ -322,7 +323,7 @@ namespace GambitoServer.Migrations
                 name: "linha_producao_hora_etapa_funcionario");
 
             migrationBuilder.DropTable(
-                name: "defeito");
+                name: "defeitos");
 
             migrationBuilder.DropTable(
                 name: "linha_producao_hora");

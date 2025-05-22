@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 
-namespace GambitoServer.GambitoIdentityContext;
-
+namespace GambitoServer.Identity;
 
 public class User : IdentityUser
 {

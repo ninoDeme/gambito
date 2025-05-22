@@ -1,4 +1,4 @@
-﻿namespace GambitoServer.GambitoContext;
+﻿namespace GambitoServer.Db;
 
 public partial class LinhaProducaoHoraEtapa
 {
@@ -16,7 +16,7 @@ public partial class LinhaProducaoHoraEtapa
 
     public virtual Etapa? EtapaNavigation { get; set; }
 
-    public virtual LinhaProducaoDium? LinhaProducaoDium { get; set; }
+    public virtual LinhaProducaoDia? LinhaProducaoDia { get; set; }
 
     public virtual ICollection<Funcionario> Funcionarios { get; set; } = new List<Funcionario>();
 }
