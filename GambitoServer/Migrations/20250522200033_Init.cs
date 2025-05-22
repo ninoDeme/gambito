@@ -17,7 +17,7 @@ namespace GambitoServer.Migrations
                 .Annotation("Npgsql:Enum:tipo_hora", "banco_horas,hora_extra");
 
             migrationBuilder.CreateTable(
-                name: "defeitos",
+                name: "defeito",
                 columns: table => new
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
@@ -146,33 +146,6 @@ namespace GambitoServer.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "linha_producao_hora_etapa",
-                columns: table => new
-                {
-                    id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityAlwaysColumn),
-                    linha_producao = table.Column<int>(type: "integer", nullable: false),
-                    data = table.Column<DateOnly>(type: "date", nullable: true),
-                    etapa = table.Column<int>(type: "integer", nullable: true),
-                    ordem = table.Column<int>(type: "integer", nullable: false),
-                    segundos = table.Column<int>(type: "integer", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("linha_producao_hora_etapa_pkey", x => x.id);
-                    table.ForeignKey(
-                        name: "linha_producao_hora_etapa_etapa_fkey",
-                        column: x => x.etapa,
-                        principalTable: "etapa",
-                        principalColumn: "id");
-                    table.ForeignKey(
-                        name: "linha_producao_hora_etapa_linha_producao_data_fkey",
-                        columns: x => new { x.linha_producao, x.data },
-                        principalTable: "linha_producao_dia",
-                        principalColumns: new[] { "linha_producao", "data" });
-                });
-
-            migrationBuilder.CreateTable(
                 name: "linha_producao_hora",
                 columns: table => new
                 {
@@ -204,6 +177,57 @@ namespace GambitoServer.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "linha_producao_hora_defeito",
+                columns: table => new
+                {
+                    linha_producao_hora = table.Column<int>(type: "integer", nullable: false),
+                    retrabalhado = table.Column<bool>(type: "boolean", nullable: false),
+                    defeito = table.Column<int>(type: "integer", nullable: false),
+                    qtd_pecas = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("linha_producao_hora_defeito_pkey", x => new { x.linha_producao_hora, x.retrabalhado, x.defeito });
+                    table.ForeignKey(
+                        name: "linha_producao_hora_defeito_defeito_fkey",
+                        column: x => x.defeito,
+                        principalTable: "defeito",
+                        principalColumn: "id");
+                    table.ForeignKey(
+                        name: "linha_producao_hora_defeito_linha_producao_hora_fkey",
+                        column: x => x.linha_producao_hora,
+                        principalTable: "linha_producao_hora",
+                        principalColumn: "id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "linha_producao_hora_etapa",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityAlwaysColumn),
+                    linha_producao_hora = table.Column<int>(type: "integer", nullable: false),
+                    etapa = table.Column<int>(type: "integer", nullable: true),
+                    ordem = table.Column<int>(type: "integer", nullable: false),
+                    segundos = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("linha_producao_hora_etapa_pkey", x => x.id);
+                    table.ForeignKey(
+                        name: "linha_producao_hora_etapa_etapa_fkey",
+                        column: x => x.etapa,
+                        principalTable: "etapa",
+                        principalColumn: "id");
+                    table.ForeignKey(
+                        name: "linha_producao_hora_etapa_linha_producao_hora_fkey",
+                        column: x => x.linha_producao_hora,
+                        principalTable: "linha_producao_hora",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "linha_producao_hora_etapa_funcionario",
                 columns: table => new
                 {
@@ -225,33 +249,9 @@ namespace GambitoServer.Migrations
                         principalColumn: "id");
                 });
 
-            migrationBuilder.CreateTable(
-                name: "linha_producao_hora_defeito",
-                columns: table => new
-                {
-                    linha_producao_hora = table.Column<int>(type: "integer", nullable: false),
-                    retrabalhado = table.Column<bool>(type: "boolean", nullable: false),
-                    defeito = table.Column<int>(type: "integer", nullable: false),
-                    qtd_pecas = table.Column<int>(type: "integer", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("linha_producao_hora_defeito_pkey", x => new { x.linha_producao_hora, x.retrabalhado, x.defeito });
-                    table.ForeignKey(
-                        name: "linha_producao_hora_defeito_defeito_fkey",
-                        column: x => x.defeito,
-                        principalTable: "defeitos",
-                        principalColumn: "id");
-                    table.ForeignKey(
-                        name: "linha_producao_hora_defeito_linha_producao_hora_fkey",
-                        column: x => x.linha_producao_hora,
-                        principalTable: "linha_producao_hora",
-                        principalColumn: "id");
-                });
-
             migrationBuilder.CreateIndex(
-                name: "ix_defeitos_nome",
-                table: "defeitos",
+                name: "ix_defeito_nome",
+                table: "defeito",
                 column: "nome",
                 unique: true);
 
@@ -292,9 +292,9 @@ namespace GambitoServer.Migrations
                 column: "etapa");
 
             migrationBuilder.CreateIndex(
-                name: "ix_linha_producao_hora_etapa_linha_producao_data",
+                name: "ix_linha_producao_hora_etapa_linha_producao_hora",
                 table: "linha_producao_hora_etapa",
-                columns: new[] { "linha_producao", "data" });
+                column: "linha_producao_hora");
 
             migrationBuilder.CreateIndex(
                 name: "ix_linha_producao_hora_etapa_funcionario_funcionario",
@@ -323,10 +323,7 @@ namespace GambitoServer.Migrations
                 name: "linha_producao_hora_etapa_funcionario");
 
             migrationBuilder.DropTable(
-                name: "defeitos");
-
-            migrationBuilder.DropTable(
-                name: "linha_producao_hora");
+                name: "defeito");
 
             migrationBuilder.DropTable(
                 name: "linha_producao_hora_etapa");
@@ -335,22 +332,25 @@ namespace GambitoServer.Migrations
                 name: "funcionario");
 
             migrationBuilder.DropTable(
-                name: "pedido");
-
-            migrationBuilder.DropTable(
                 name: "etapa");
 
             migrationBuilder.DropTable(
-                name: "linha_producao_dia");
+                name: "linha_producao_hora");
 
             migrationBuilder.DropTable(
                 name: "funcao");
 
             migrationBuilder.DropTable(
-                name: "produto");
+                name: "linha_producao_dia");
+
+            migrationBuilder.DropTable(
+                name: "pedido");
 
             migrationBuilder.DropTable(
                 name: "linha_producao");
+
+            migrationBuilder.DropTable(
+                name: "produto");
         }
     }
 }

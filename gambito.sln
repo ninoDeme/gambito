@@ -1,24 +1,22 @@
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.5.2.0
+VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GambitoServer", "GambitoServer\GambitoServer.csproj", "{D0FCE6D8-945A-7052-00CC-04B0FBA340F5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GambitoServer", "GambitoServer\GambitoServer.csproj", "{2837A6FB-307D-4053-8297-C71A75BF2B2F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
-	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{D0FCE6D8-945A-7052-00CC-04B0FBA340F5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D0FCE6D8-945A-7052-00CC-04B0FBA340F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D0FCE6D8-945A-7052-00CC-04B0FBA340F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D0FCE6D8-945A-7052-00CC-04B0FBA340F5}.Release|Any CPU.Build.0 = Release|Any CPU
-	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
-	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {66E9A353-A31B-48B1-9636-4AE837358CAA}
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2837A6FB-307D-4053-8297-C71A75BF2B2F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2837A6FB-307D-4053-8297-C71A75BF2B2F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2837A6FB-307D-4053-8297-C71A75BF2B2F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2837A6FB-307D-4053-8297-C71A75BF2B2F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

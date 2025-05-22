@@ -1,14 +1,18 @@
-﻿namespace GambitoServer.Db;
+﻿using System.Text.Json.Serialization;
+
+namespace GambitoServer.Db;
 
 public partial class Pedido
 {
-    public int Id { get; set; }
+  public int Id { get; set; }
 
-    public int Produto { get; set; }
+  public int Produto { get; set; }
 
-    public int QtdPecas { get; set; }
+  public int QtdPecas { get; set; }
 
-    public virtual ICollection<LinhaProducaoHora> LinhaProducaoHoras { get; set; } = new List<LinhaProducaoHora>();
+  [JsonIgnore]
+  public virtual ICollection<LinhaProducaoHora> LinhaProducaoHoras { get; set; } = new List<LinhaProducaoHora>();
 
-    public virtual Produto ProdutoNavigation { get; set; } = null!;
+  [JsonIgnore]
+  public virtual Produto ProdutoNavigation { get; set; } = null!;
 }

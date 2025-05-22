@@ -1,10 +1,13 @@
-﻿namespace GambitoServer.Db;
+﻿using System.Text.Json.Serialization;
+
+namespace GambitoServer.Db;
 
 public partial class Funcao
 {
-    public int Id { get; set; }
+  public int Id { get; set; }
 
-    public string Nome { get; set; } = null!;
+  public string Nome { get; set; } = null!;
 
-    public virtual ICollection<Funcionario> Funcionarios { get; set; } = new List<Funcionario>();
+  [JsonIgnore]
+  public virtual ICollection<Funcionario> Funcionarios { get; set; } = new List<Funcionario>();
 }

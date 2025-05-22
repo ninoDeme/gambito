@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace GambitoServer.Db;
 
@@ -38,7 +39,9 @@ public partial class GambitoContext : DbContext
   protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
   {
     optionsBuilder
-      .UseNpgsql("Host=localhost:15432;Username=postgres;Password=postgres;Database=gambito", o => o.MapEnum<TipoHora>("tipo_hora"))
+      .UseNpgsql(
+        "Host=localhost:15432;Username=postgres;Password=postgres;Database=gambito",
+        o => o.MapEnum<TipoHora>("tipo_hora").UseNodaTime())
       .UseSnakeCaseNamingConvention();
   }
 
@@ -154,7 +157,7 @@ public partial class GambitoContext : DbContext
               .OnDelete(DeleteBehavior.ClientNoAction)
               .HasConstraintName("linha_producao_hora_pedido_fkey");
 
-      entity.HasOne(d => d.LinhaProducaoDia).WithMany(p => p.LinhaProducaoHoras)
+      entity.HasOne(d => d.LinhaProducaoDiaNavigation).WithMany(p => p.LinhaProducaoHoras)
               .HasForeignKey(d => new { d.LinhaProducao, d.Data })
               .HasConstraintName("linha_producao_hora_linha_producao_data_fkey");
     });
@@ -172,12 +175,12 @@ public partial class GambitoContext : DbContext
 
       entity.HasOne(d => d.DefeitoNavigation).WithMany(p => p.LinhaProducaoHoraDefeitos)
               .HasForeignKey(d => d.Defeito)
-              .OnDelete(DeleteBehavior.ClientSetNull)
+              .OnDelete(DeleteBehavior.ClientNoAction)
               .HasConstraintName("linha_producao_hora_defeito_defeito_fkey");
 
       entity.HasOne(d => d.LinhaProducaoHoraNavigation).WithMany(p => p.LinhaProducaoHoraDefeitos)
               .HasForeignKey(d => d.LinhaProducaoHora)
-              .OnDelete(DeleteBehavior.ClientSetNull)
+              .OnDelete(DeleteBehavior.ClientNoAction)
               .HasConstraintName("linha_producao_hora_defeito_linha_producao_hora_fkey");
     });
 
@@ -189,9 +192,8 @@ public partial class GambitoContext : DbContext
 
       entity.Property(e => e.Id)
               .UseIdentityAlwaysColumn();
-      entity.Property(e => e.Data);
       entity.Property(e => e.Etapa);
-      entity.Property(e => e.LinhaProducao);
+      entity.Property(e => e.LinhaProducaoHora);
       entity.Property(e => e.Ordem);
       entity.Property(e => e.Segundos);
 
@@ -199,9 +201,9 @@ public partial class GambitoContext : DbContext
               .HasForeignKey(d => d.Etapa)
               .HasConstraintName("linha_producao_hora_etapa_etapa_fkey");
 
-      entity.HasOne(d => d.LinhaProducaoDia).WithMany(p => p.LinhaProducaoHoraEtapas)
-              .HasForeignKey(d => new { d.LinhaProducao, d.Data })
-              .HasConstraintName("linha_producao_hora_etapa_linha_producao_data_fkey");
+      entity.HasOne(d => d.LinhaProducaoHoraNavigation).WithMany(p => p.LinhaProducaoHoraEtapas)
+              .HasForeignKey(d => new { d.LinhaProducaoHora })
+              .HasConstraintName("linha_producao_hora_etapa_linha_producao_hora_fkey");
 
       entity.HasMany(d => d.Funcionarios).WithMany(p => p.LinhaProducaoHoraEtapas)
               .UsingEntity<Dictionary<string, object>>(

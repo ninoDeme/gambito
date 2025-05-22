@@ -1,16 +1,19 @@
-﻿namespace GambitoServer.Db;
+﻿using System.Text.Json.Serialization;
+using NodaTime;
+
+namespace GambitoServer.Db;
 
 public partial class LinhaProducaoDia
 {
-    public int LinhaProducao { get; set; }
+  public int LinhaProducao { get; set; }
 
-    public DateOnly Data { get; set; }
+  public LocalDate Data { get; set; }
 
-    public bool Invativo { get; set; }
+  public bool Invativo { get; set; }
 
-    public virtual ICollection<LinhaProducaoHoraEtapa> LinhaProducaoHoraEtapas { get; set; } = new List<LinhaProducaoHoraEtapa>();
+  [JsonIgnore]
+  public virtual ICollection<LinhaProducaoHora> LinhaProducaoHoras { get; set; } = new List<LinhaProducaoHora>();
 
-    public virtual ICollection<LinhaProducaoHora> LinhaProducaoHoras { get; set; } = new List<LinhaProducaoHora>();
-
-    public virtual LinhaProducao LinhaProducaoNavigation { get; set; } = null!;
+  [JsonIgnore]
+  public virtual LinhaProducao LinhaProducaoNavigation { get; set; } = null!;
 }

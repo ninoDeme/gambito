@@ -1,13 +1,17 @@
-using Dapper;
 using GambitoServer.Db;
 using GambitoServer.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Npgsql;
-using NuGet.Protocol;
+using NodaTime;
+using NodaTime.Serialization.SystemTextJson;
 
 // var builder = WebApplication.CreateSlimBuilder(args);
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.ConfigureHttpJsonOptions(o =>
+{
+  // o.SerializerOptions.ConfigureForNodaTime(DateTimeZoneProviders.Tzdb);
+});
 
 builder.Services.AddDbContext<GambitoContext>();
 builder.Services.AddDbContext<GambitoIdentityContext>();
@@ -113,10 +117,11 @@ app.Run();
 public class LinhaProducaoController : ControllerBase
 {
   [HttpGet("")]
-  public List<LinhaProducao> GetAll(GambitoContext dataSource)
+  public List<LinhaProducaoModel> GetAll(GambitoContext dataSource)
   {
     var res = dataSource.LinhaProducaos;
-    return res.ToList();
+    Console.WriteLine(res.First());
+    return res.Select(l => new LinhaProducaoModel(l.Id, l.Descricao, l.LinhaProducaoDia.ToList())).ToList();
   }
 
   [HttpGet("{id}")]
@@ -133,8 +138,10 @@ public class LinhaProducaoController : ControllerBase
   [HttpPost]
   public async Task<IResult> Set(LinhaProducao body, GambitoContext db)
   {
+    Console.WriteLine(body);
     var res = await db.LinhaProducaos.AddAsync(body);
-    return Results.Ok(res.CurrentValues.ToJson());
+    await db.SaveChangesAsync();
+    return Results.Ok(res.Entity);
   }
 }
 
