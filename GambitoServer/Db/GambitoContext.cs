@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Npgsql;
+using GambitoServer.LinhaProducao;
 
 namespace GambitoServer.Db;
 
@@ -14,27 +15,27 @@ public partial class GambitoContext : DbContext
   {
   }
 
-  public virtual DbSet<Defeito> Defeitos { get; set; }
+  public virtual DbSet<DefeitoEntity> Defeitos { get; set; }
 
-  public virtual DbSet<Etapa> Etapas { get; set; }
+  public virtual DbSet<EtapaEntity> Etapas { get; set; }
 
-  public virtual DbSet<Funcao> Funcaos { get; set; }
+  public virtual DbSet<FuncaoEntity> Funcaos { get; set; }
 
-  public virtual DbSet<Funcionario> Funcionarios { get; set; }
+  public virtual DbSet<FuncionarioEntity> Funcionarios { get; set; }
 
-  public virtual DbSet<LinhaProducao> LinhaProducaos { get; set; }
+  public virtual DbSet<LinhaProducaoEntity> LinhaProducaos { get; set; }
 
-  public virtual DbSet<LinhaProducaoDia> LinhaProducaoDia { get; set; }
+  public virtual DbSet<LinhaProducaoDiaEntity> LinhaProducaoDia { get; set; }
 
-  public virtual DbSet<LinhaProducaoHora> LinhaProducaoHoras { get; set; }
+  public virtual DbSet<LinhaProducaoHoraEntity> LinhaProducaoHoras { get; set; }
 
-  public virtual DbSet<LinhaProducaoHoraDefeito> LinhaProducaoHoraDefeitos { get; set; }
+  public virtual DbSet<LinhaProducaoHoraDefeitoEntity> LinhaProducaoHoraDefeitos { get; set; }
 
-  public virtual DbSet<LinhaProducaoHoraEtapa> LinhaProducaoHoraEtapas { get; set; }
+  public virtual DbSet<LinhaProducaoHoraEtapaEntity> LinhaProducaoHoraEtapas { get; set; }
 
-  public virtual DbSet<Pedido> Pedidos { get; set; }
+  public virtual DbSet<PedidoEntity> Pedidos { get; set; }
 
-  public virtual DbSet<Produto> Produtos { get; set; }
+  public virtual DbSet<ProdutoEntity> Produtos { get; set; }
 
   protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
   {
@@ -47,7 +48,7 @@ public partial class GambitoContext : DbContext
 
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {
-    modelBuilder.Entity<Defeito>(entity =>
+    modelBuilder.Entity<DefeitoEntity>(entity =>
     {
       entity.HasKey(e => e.Id).HasName("defeito_pkey");
 
@@ -61,7 +62,7 @@ public partial class GambitoContext : DbContext
               .HasMaxLength(50);
     });
 
-    modelBuilder.Entity<Etapa>(entity =>
+    modelBuilder.Entity<EtapaEntity>(entity =>
     {
       entity.HasKey(e => e.Id).HasName("etapa_pkey");
 
@@ -73,7 +74,7 @@ public partial class GambitoContext : DbContext
               .HasMaxLength(100);
     });
 
-    modelBuilder.Entity<Funcao>(entity =>
+    modelBuilder.Entity<FuncaoEntity>(entity =>
     {
       entity.HasKey(e => e.Id).HasName("funcao_pkey");
 
@@ -87,7 +88,7 @@ public partial class GambitoContext : DbContext
               .HasMaxLength(100);
     });
 
-    modelBuilder.Entity<Funcionario>(entity =>
+    modelBuilder.Entity<FuncionarioEntity>(entity =>
     {
       entity.HasKey(e => e.Id).HasName("funcionario_pkey");
 
@@ -111,7 +112,7 @@ public partial class GambitoContext : DbContext
               .HasConstraintName("funcionario_funcao_fkey");
     });
 
-    modelBuilder.Entity<LinhaProducao>(entity =>
+    modelBuilder.Entity<LinhaProducaoEntity>(entity =>
     {
       entity.HasKey(e => e.Id).HasName("linha_producao_pkey");
 
@@ -122,7 +123,7 @@ public partial class GambitoContext : DbContext
       entity.Property(e => e.Descricao);
     });
 
-    modelBuilder.Entity<LinhaProducaoDia>(entity =>
+    modelBuilder.Entity<LinhaProducaoDiaEntity>(entity =>
     {
       entity.HasKey(e => new { e.LinhaProducao, e.Data }).HasName("linha_producao_dia_pkey");
 
@@ -139,7 +140,7 @@ public partial class GambitoContext : DbContext
               .HasConstraintName("linha_producao_dia_linha_producao_fkey");
     });
 
-    modelBuilder.Entity<LinhaProducaoHora>(entity =>
+    modelBuilder.Entity<LinhaProducaoHoraEntity>(entity =>
     {
       entity.HasKey(e => e.Id).HasName("linha_producao_hora_pkey");
 
@@ -162,7 +163,7 @@ public partial class GambitoContext : DbContext
               .HasConstraintName("linha_producao_hora_linha_producao_data_fkey");
     });
 
-    modelBuilder.Entity<LinhaProducaoHoraDefeito>(entity =>
+    modelBuilder.Entity<LinhaProducaoHoraDefeitoEntity>(entity =>
     {
       entity.HasKey(e => new { e.LinhaProducaoHora, e.Retrabalhado, e.Defeito }).HasName("linha_producao_hora_defeito_pkey");
 
@@ -184,7 +185,7 @@ public partial class GambitoContext : DbContext
               .HasConstraintName("linha_producao_hora_defeito_linha_producao_hora_fkey");
     });
 
-    modelBuilder.Entity<LinhaProducaoHoraEtapa>(entity =>
+    modelBuilder.Entity<LinhaProducaoHoraEtapaEntity>(entity =>
     {
       entity.HasKey(e => e.Id).HasName("linha_producao_hora_etapa_pkey");
 
@@ -208,11 +209,11 @@ public partial class GambitoContext : DbContext
       entity.HasMany(d => d.Funcionarios).WithMany(p => p.LinhaProducaoHoraEtapas)
               .UsingEntity<Dictionary<string, object>>(
                   "LinhaProducaoHoraEtapaFuncionario",
-                  r => r.HasOne<Funcionario>().WithMany()
+                  r => r.HasOne<FuncionarioEntity>().WithMany()
                       .HasForeignKey("Funcionario")
                       .OnDelete(DeleteBehavior.ClientSetNull)
                       .HasConstraintName("linha_producao_hora_etapa_funcionario_funcionario_fkey"),
-                  l => l.HasOne<LinhaProducaoHoraEtapa>().WithMany()
+                  l => l.HasOne<LinhaProducaoHoraEtapaEntity>().WithMany()
                       .HasForeignKey("LinhaProducaoHoraEtapa")
                       .OnDelete(DeleteBehavior.ClientSetNull)
                       .HasConstraintName("linha_producao_hora_etapa_funcio_linha_producao_hora_etapa_fkey"),
@@ -225,7 +226,7 @@ public partial class GambitoContext : DbContext
                   });
     });
 
-    modelBuilder.Entity<Pedido>(entity =>
+    modelBuilder.Entity<PedidoEntity>(entity =>
     {
       entity.HasKey(e => e.Id).HasName("pedido_pkey");
 
@@ -242,7 +243,7 @@ public partial class GambitoContext : DbContext
               .HasConstraintName("pedido_produto_fkey");
     });
 
-    modelBuilder.Entity<Produto>(entity =>
+    modelBuilder.Entity<ProdutoEntity>(entity =>
     {
       entity.HasKey(e => e.Id).HasName("produto_pkey");
 

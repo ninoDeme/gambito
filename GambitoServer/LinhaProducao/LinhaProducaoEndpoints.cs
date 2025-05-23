@@ -1,6 +1,9 @@
 using GambitoServer.Db;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NodaTime;
+
+namespace GambitoServer.LinhaProducao;
 
 public static class LinhaProducaoEndpoints
 {
@@ -26,8 +29,10 @@ public static class LinhaProducaoEndpoints
 
     group.MapPost("/", async ([FromBody] LinhaProducaoModel body, GambitoContext db) =>
     {
-      Console.WriteLine(body);
-      var res = await db.LinhaProducaos.AddAsync(new LinhaProducao());
+
+      var res1 = await db.LinhaProducaoHoras.Where(l => l.LinhaProducaoDiaNavigation.Data == null).ToListAsync();
+
+      var res = await db.LinhaProducaos.AddAsync(new LinhaProducaoEntity());
       await db.SaveChangesAsync();
       return TypedResults.Created($"api/linha-producao/{res.Entity.Id}", new LinhaProducaoModel(res.Entity));
     });

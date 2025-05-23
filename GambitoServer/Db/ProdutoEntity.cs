@@ -1,6 +1,6 @@
 ﻿namespace GambitoServer.Db;
 
-public partial class Produto
+public partial class ProdutoEntity
 {
   public int Id { get; set; }
 
@@ -8,5 +8,5 @@ public partial class Produto
 
   public int TempoPeca { get; set; }
 
-  public virtual ICollection<Pedido> Pedidos { get; set; } = new List<Pedido>();
+  public virtual ICollection<PedidoEntity> Pedidos { get; set; } = new List<PedidoEntity>();
 }
