@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
-namespace GambitoServer.Db;
+﻿namespace GambitoServer.Db;
 
 public partial class Funcionario
 {
@@ -18,9 +16,7 @@ public partial class Funcionario
 
   public virtual Funcao? FuncaoNavigation { get; set; }
 
-  [JsonIgnore]
   public virtual ICollection<Funcionario> InverseEncarregadoNavigation { get; set; } = new List<Funcionario>();
 
-  [JsonIgnore]
   public virtual ICollection<LinhaProducaoHoraEtapa> LinhaProducaoHoraEtapas { get; set; } = new List<LinhaProducaoHoraEtapa>();
 }

@@ -1,5 +1,4 @@
-﻿using System.Text.Json.Serialization;
-using NodaTime;
+﻿using NodaTime;
 
 namespace GambitoServer.Db;
 
@@ -25,15 +24,11 @@ public partial class LinhaProducaoHora
 
   public TipoHora? Tipo { get; set; }
 
-  [JsonIgnore]
   public virtual LinhaProducaoDia? LinhaProducaoDiaNavigation { get; set; }
 
-  [JsonIgnore]
   public virtual ICollection<LinhaProducaoHoraDefeito> LinhaProducaoHoraDefeitos { get; set; } = new List<LinhaProducaoHoraDefeito>();
 
-  [JsonIgnore]
   public virtual ICollection<LinhaProducaoHoraEtapa> LinhaProducaoHoraEtapas { get; set; } = new List<LinhaProducaoHoraEtapa>();
 
-  [JsonIgnore]
   public virtual Pedido PedidoNavigation { get; set; } = null!;
 }

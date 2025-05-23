@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
-namespace GambitoServer.Db;
+﻿namespace GambitoServer.Db;
 
 public partial class Defeito
 {
@@ -8,6 +6,5 @@ public partial class Defeito
 
   public string Nome { get; set; } = null!;
 
-  [JsonIgnore]
   public virtual ICollection<LinhaProducaoHoraDefeito> LinhaProducaoHoraDefeitos { get; set; } = new List<LinhaProducaoHoraDefeito>();
 }

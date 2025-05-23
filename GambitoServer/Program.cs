@@ -1,9 +1,7 @@
 using GambitoServer.Db;
 using GambitoServer.Identity;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using NodaTime;
-using NodaTime.Serialization.SystemTextJson;
+using Scalar.AspNetCore;
 
 // var builder = WebApplication.CreateSlimBuilder(args);
 var builder = WebApplication.CreateBuilder(args);
@@ -29,6 +27,8 @@ builder.Services.AddAuthentication().AddCookie(IdentityConstants.ApplicationSche
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddOpenApi();
 
 builder.Services.AddIdentityCore<User>()
   .AddEntityFrameworkStores<GambitoIdentityContext>()
@@ -57,6 +57,9 @@ if (app.Environment.IsDevelopment())
   app.UseSwagger();
   app.UseSwaggerUI();
 
+  app.MapOpenApi();
+  app.MapScalarApiReference();
+
   app.UseDeveloperExceptionPage();
 }
 else
@@ -73,75 +76,10 @@ else
 app.UseAuthorization();
 app.UseAuthentication();
 
-app.MapGroup("api/auth").MapIdentityApi<User>();
-
-var router = app.MapGroup("/api");
+app.MapGroup("api/auth").WithTags("Auth").MapIdentityApi<User>();
 
 app.MapControllers();
 
-// LinhaProducaoMinimalController.Register(router);
+app.MapLinhaProducaoEndpoints();
 
 app.Run();
-
-// public static class LinhaProducaoMinimalController
-// {
-//   public static void Register(RouteGroupBuilder router)
-//   {
-//     var group = router.MapGroup("/linha-producao-m");
-//
-//     group.MapGet("/", async (NpgsqlDataSource dataSource, HttpContext context) =>
-//     {
-//       await using var db = await dataSource.OpenConnectionAsync();
-//       var res = await db.QueryAsync<LinhaProducao>("SELECT * FROM linha_producao");
-//       return res.ToArray();
-//     });
-//
-//     group.MapGet("/{id}", async (int id, NpgsqlDataSource dataSource) =>
-//     {
-//       await using var db = await dataSource.OpenConnectionAsync();
-//       var res = await db.QueryAsync<LinhaProducao>("SELECT * FROM linha_producao WHERE id = @id", new { id });
-//       try
-//       {
-//         return Results.Ok(res.First());
-//       }
-//       catch (Exception)
-//       {
-//         return Results.NotFound();
-//       }
-//     });
-//   }
-// }
-
-[ApiController]
-[Route("api/linha-producao")]
-public class LinhaProducaoController : ControllerBase
-{
-  [HttpGet("")]
-  public List<LinhaProducaoModel> GetAll(GambitoContext dataSource)
-  {
-    var res = dataSource.LinhaProducaos;
-    Console.WriteLine(res.First());
-    return res.Select(l => new LinhaProducaoModel(l.Id, l.Descricao, l.LinhaProducaoDia.ToList())).ToList();
-  }
-
-  [HttpGet("{id}")]
-  public async Task<IResult> Get(int id, GambitoContext dataSource)
-  {
-    var res = await dataSource.LinhaProducaos.FindAsync(id);
-    if (res is null)
-    {
-      return Results.NotFound();
-    }
-    return Results.Ok(res);
-  }
-
-  [HttpPost]
-  public async Task<IResult> Set(LinhaProducao body, GambitoContext db)
-  {
-    Console.WriteLine(body);
-    var res = await db.LinhaProducaos.AddAsync(body);
-    await db.SaveChangesAsync();
-    return Results.Ok(res.Entity);
-  }
-}
-

@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
-namespace GambitoServer.Db;
+﻿namespace GambitoServer.Db;
 
 public partial class LinhaProducaoHoraDefeito
 {
@@ -12,9 +10,7 @@ public partial class LinhaProducaoHoraDefeito
 
   public int QtdPecas { get; set; }
 
-  [JsonIgnore]
   public virtual Defeito DefeitoNavigation { get; set; } = null!;
 
-  [JsonIgnore]
   public virtual LinhaProducaoHora LinhaProducaoHoraNavigation { get; set; } = null!;
 }

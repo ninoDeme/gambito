@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
-namespace GambitoServer.Db;
+﻿namespace GambitoServer.Db;
 
 public partial class Produto
 {
@@ -10,6 +8,5 @@ public partial class Produto
 
   public int TempoPeca { get; set; }
 
-  [JsonIgnore]
   public virtual ICollection<Pedido> Pedidos { get; set; } = new List<Pedido>();
 }
