@@ -1,5 +1,5 @@
 using GambitoServer.Db;
-using GambitoServer.Identity;
+using GambitoServer.LinhaProducao;
 using Microsoft.AspNetCore.Identity;
 using Scalar.AspNetCore;
 
@@ -12,7 +12,6 @@ builder.Services.ConfigureHttpJsonOptions(o =>
 });
 
 builder.Services.AddDbContext<GambitoContext>();
-builder.Services.AddDbContext<GambitoIdentityContext>();
 
 builder.Services.AddControllers();
 builder.Services.AddProblemDetails();
@@ -31,7 +30,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddOpenApi();
 
 builder.Services.AddIdentityCore<User>()
-  .AddEntityFrameworkStores<GambitoIdentityContext>()
+  .AddEntityFrameworkStores<GambitoContext>()
   .AddApiEndpoints();
 
 // Logging
@@ -81,5 +80,24 @@ app.MapGroup("api/auth").WithTags("Auth").MapIdentityApi<User>();
 app.MapControllers();
 
 app.MapLinhaProducaoEndpoints();
+
+app.MapGroup("api/org").WithTags("Org").MapPost("{name}", (GambitoContext db, string name) =>
+{
+  var o = db.Org.First()!;
+  o.Nome = name;
+  db.SaveChanges();
+  return o;
+});
+
+app.MapGroup("api/org").WithTags("Org").MapPost("", (GambitoContext db) =>
+{
+  var o = new OrgEntity
+  {
+    Nome = "Teste"
+  };
+  db.Org.Add(o);
+  db.SaveChanges();
+  return o;
+});
 
 app.Run();

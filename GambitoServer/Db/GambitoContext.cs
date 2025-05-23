@@ -1,10 +1,13 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using GambitoServer.LinhaProducao;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using NodaTime;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace GambitoServer.Db;
 
-public partial class GambitoContext : DbContext
+public partial class GambitoContext : IdentityDbContext<User>
 {
   public GambitoContext()
   {
@@ -14,6 +17,8 @@ public partial class GambitoContext : DbContext
       : base(options)
   {
   }
+
+  public virtual DbSet<OrgEntity> Org { get; set; }
 
   public virtual DbSet<DefeitoEntity> Defeitos { get; set; }
 
@@ -121,6 +126,13 @@ public partial class GambitoContext : DbContext
       entity.Property(e => e.Id)
               .UseIdentityAlwaysColumn();
       entity.Property(e => e.Descricao);
+
+      entity.HasOne(d => d.OrgNavigation).WithMany()
+              .HasForeignKey(d => d.Org)
+              .OnDelete(DeleteBehavior.ClientSetNull)
+              .HasConstraintName("linha_producao_dia_linha_producao_fkey");
+
+      // entity.HasQueryFilter(l => l.Org == this.Users)
     });
 
     modelBuilder.Entity<LinhaProducaoDiaEntity>(entity =>
@@ -258,8 +270,55 @@ public partial class GambitoContext : DbContext
       entity.Property(e => e.TempoPeca);
     });
 
-    OnModelCreatingPartial(modelBuilder);
+    new OrgEntityTypeConfiguration().Configure(modelBuilder.Entity<OrgEntity>());
+
+    base.OnModelCreating(modelBuilder);
   }
 
-  partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+  public override int SaveChanges()
+  {
+    var modifiedEntities = ChangeTracker.Entries()
+      .Where(e => e.State == EntityState.Modified);
+
+    foreach (var entity in modifiedEntities)
+    {
+      if (entity.Property("UpdatedAt") is not null)
+      {
+        entity.Property("UpdatedAt").CurrentValue = new ZonedDateTime(Instant.FromDateTimeUtc(DateTime.UtcNow), DateTimeZone.Utc);
+      }
+    }
+
+    return base.SaveChanges();
+  }
+}
+
+public class BaseEntity
+{
+  public ZonedDateTime CreatedAt { get; private set; } = new ZonedDateTime(Instant.FromDateTimeUtc(DateTime.UtcNow), DateTimeZone.Utc);
+  public ZonedDateTime UpdatedAt { get; private set; } = new ZonedDateTime(Instant.FromDateTimeUtc(DateTime.UtcNow), DateTimeZone.Utc);
+}
+
+public class OrgEntityTypeConfiguration : IEntityTypeConfiguration<OrgEntity>
+{
+    public void Configure(EntityTypeBuilder<OrgEntity> entity)
+    {
+      entity.Property(e => e.CreatedAt).ValueGeneratedOnAdd().HasDefaultValueSql("CURRENT_TIMESTAMP");
+      entity.Property(e => e.UpdatedAt).ValueGeneratedOnAdd().HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+      entity.HasKey(e => e.Guid).HasName("organizacao_pkey");
+
+      entity.ToTable("organizacao");
+
+      entity.Property(e => e.Guid);
+
+      entity.Property(e => e.Nome)
+        .HasMaxLength(100);
+    }
+}
+
+public class OrgEntity : BaseEntity
+{
+  public Guid Guid { get; private set; } = Guid.CreateVersion7();
+
+  public required string Nome { get; set; }
 }

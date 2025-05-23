@@ -1,10 +1,16 @@
-﻿namespace GambitoServer.LinhaProducao;
+﻿using GambitoServer.Db;
+
+namespace GambitoServer.LinhaProducao;
 
 public partial class LinhaProducaoEntity
 {
   public int Id { get; set; }
 
   public string? Descricao { get; set; }
+
+  public Guid Org { get; set; }
+
+  public virtual OrgEntity OrgNavigation { get; set; } = null!;
 
   public static LinhaProducaoEntity FromModel(LinhaProducaoModel m)
   {
