@@ -31,6 +31,7 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddIdentityCore<User>()
   .AddEntityFrameworkStores<GambitoContext>()
+  .AddRoles<IdentityRole>()
   .AddApiEndpoints();
 
 // Logging
@@ -71,6 +72,13 @@ else
   app.UseResponseCompression();
   app.UseAntiforgery();
 }
+
+
+app.Use(async (context, next) =>
+{
+  var user = context.User.Identity;
+  await next(context);
+});
 
 app.UseAuthorization();
 app.UseAuthentication();

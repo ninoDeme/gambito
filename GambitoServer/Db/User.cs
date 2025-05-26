@@ -4,7 +4,6 @@ namespace GambitoServer.Db;
 
 public class User : IdentityUser
 {
-  [PersonalData]
-  public Guid Organization { get; set; }
+  public virtual ICollection<OrgEntity> Organizacoes { get; set; } = [];
 };
 

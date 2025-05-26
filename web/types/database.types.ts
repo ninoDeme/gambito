@@ -38,46 +38,79 @@ export type Database = {
         Row: {
           id: number
           nome: string
+          organizacao: number | null
         }
         Insert: {
           id?: never
           nome: string
+          organizacao?: number | null
         }
         Update: {
           id?: never
           nome?: string
+          organizacao?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "defeito_organizacao_fkey"
+            columns: ["organizacao"]
+            isOneToOne: false
+            referencedRelation: "organizacao"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       etapa: {
         Row: {
           id: number
           nome: string
+          organizacao: number | null
         }
         Insert: {
           id?: never
           nome: string
+          organizacao?: number | null
         }
         Update: {
           id?: never
           nome?: string
+          organizacao?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "etapa_organizacao_fkey"
+            columns: ["organizacao"]
+            isOneToOne: false
+            referencedRelation: "organizacao"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       funcao: {
         Row: {
           id: number
           nome: string
+          organizacao: number | null
         }
         Insert: {
           id?: never
           nome: string
+          organizacao?: number | null
         }
         Update: {
           id?: never
           nome?: string
+          organizacao?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "funcao_organizacao_fkey"
+            columns: ["organizacao"]
+            isOneToOne: false
+            referencedRelation: "organizacao"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       funcionario: {
         Row: {
@@ -86,6 +119,7 @@ export type Database = {
           id: number
           invativo: boolean
           nome: string
+          organizacao: number | null
         }
         Insert: {
           encarregado?: number | null
@@ -93,6 +127,7 @@ export type Database = {
           id?: never
           invativo?: boolean
           nome: string
+          organizacao?: number | null
         }
         Update: {
           encarregado?: number | null
@@ -100,6 +135,7 @@ export type Database = {
           id?: never
           invativo?: boolean
           nome?: string
+          organizacao?: number | null
         }
         Relationships: [
           {
@@ -116,22 +152,40 @@ export type Database = {
             referencedRelation: "funcao"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "funcionario_organizacao_fkey"
+            columns: ["organizacao"]
+            isOneToOne: false
+            referencedRelation: "organizacao"
+            referencedColumns: ["id"]
+          },
         ]
       }
       linha_producao: {
         Row: {
           descricao: string | null
           id: number
+          organizacao: number | null
         }
         Insert: {
           descricao?: string | null
           id?: never
+          organizacao?: number | null
         }
         Update: {
           descricao?: string | null
           id?: never
+          organizacao?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "linha_producao_organizacao_fkey"
+            columns: ["organizacao"]
+            isOneToOne: false
+            referencedRelation: "organizacao"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       linha_producao_dia: {
         Row: {
@@ -251,26 +305,23 @@ export type Database = {
       }
       linha_producao_hora_etapa: {
         Row: {
-          data: string | null
           etapa: number | null
           id: number
-          linha_producao: number
+          linha_producao_hora: number
           ordem: number
           segundos: number
         }
         Insert: {
-          data?: string | null
           etapa?: number | null
           id?: never
-          linha_producao: number
+          linha_producao_hora: number
           ordem: number
           segundos: number
         }
         Update: {
-          data?: string | null
           etapa?: number | null
           id?: never
-          linha_producao?: number
+          linha_producao_hora?: number
           ordem?: number
           segundos?: number
         }
@@ -283,11 +334,11 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "linha_producao_hora_etapa_linha_producao_data_fkey"
-            columns: ["linha_producao", "data"]
+            foreignKeyName: "linha_producao_hora_etapa_linha_producao_hora_fkey"
+            columns: ["linha_producao_hora"]
             isOneToOne: false
-            referencedRelation: "linha_producao_dia"
-            referencedColumns: ["linha_producao", "data"]
+            referencedRelation: "linha_producao_hora"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -321,6 +372,21 @@ export type Database = {
           },
         ]
       }
+      organizacao: {
+        Row: {
+          id: number
+          nome: string
+        }
+        Insert: {
+          id?: never
+          nome: string
+        }
+        Update: {
+          id?: never
+          nome?: string
+        }
+        Relationships: []
+      }
       pedido: {
         Row: {
           id: number
@@ -351,19 +417,53 @@ export type Database = {
         Row: {
           id: number
           nome: string
+          organizacao: number | null
           tempo_peca: number
         }
         Insert: {
           id?: never
           nome: string
+          organizacao?: number | null
           tempo_peca: number
         }
         Update: {
           id?: never
           nome?: string
+          organizacao?: number | null
           tempo_peca?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "produto_organizacao_fkey"
+            columns: ["organizacao"]
+            isOneToOne: false
+            referencedRelation: "organizacao"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_organizacao: {
+        Row: {
+          organizacao: number
+          usuario: string
+        }
+        Insert: {
+          organizacao: number
+          usuario: string
+        }
+        Update: {
+          organizacao?: number
+          usuario?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_organizacao_organizacao_fkey"
+            columns: ["organizacao"]
+            isOneToOne: false
+            referencedRelation: "organizacao"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

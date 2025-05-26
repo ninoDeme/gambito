@@ -2,20 +2,26 @@
 using Npgsql;
 using GambitoServer.LinhaProducao;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using NodaTime;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore.ValueGeneration;
+using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace GambitoServer.Db;
 
 public partial class GambitoContext : IdentityDbContext<User>
 {
-  public GambitoContext()
+
+  private readonly IdentityService _identity;
+
+  public GambitoContext(IdentityService identity)
   {
+    _identity = identity;
   }
 
-  public GambitoContext(DbContextOptions<GambitoContext> options)
+  public GambitoContext(DbContextOptions<GambitoContext> options, IdentityService identity)
       : base(options)
   {
+    _identity = identity;
   }
 
   public virtual DbSet<OrgEntity> Org { get; set; }
@@ -65,6 +71,7 @@ public partial class GambitoContext : IdentityDbContext<User>
               .UseIdentityAlwaysColumn();
       entity.Property(e => e.Nome)
               .HasMaxLength(50);
+
     });
 
     modelBuilder.Entity<EtapaEntity>(entity =>
@@ -127,12 +134,13 @@ public partial class GambitoContext : IdentityDbContext<User>
               .UseIdentityAlwaysColumn();
       entity.Property(e => e.Descricao);
 
+      entity.Property(e => e.Org);
+
       entity.HasOne(d => d.OrgNavigation).WithMany()
               .HasForeignKey(d => d.Org)
-              .OnDelete(DeleteBehavior.ClientSetNull)
-              .HasConstraintName("linha_producao_dia_linha_producao_fkey");
+              .OnDelete(DeleteBehavior.ClientCascade);
 
-      // entity.HasQueryFilter(l => l.Org == this.Users)
+      entity.HasQueryFilter(l => l.Org == _identity.GetOrg());
     });
 
     modelBuilder.Entity<LinhaProducaoDiaEntity>(entity =>
@@ -270,55 +278,85 @@ public partial class GambitoContext : IdentityDbContext<User>
       entity.Property(e => e.TempoPeca);
     });
 
-    new OrgEntityTypeConfiguration().Configure(modelBuilder.Entity<OrgEntity>());
+    modelBuilder.Entity<OrgEntity>(entity =>
+    {
+      entity.HasKey(e => e.Id).HasName("organizacao_pkey");
+
+      entity.ToTable("organizacao");
+
+      entity.Property(e => e.Id)
+            .UseIdentityAlwaysColumn();
+
+      entity.Property(e => e.Nome)
+        .HasMaxLength(100);
+
+      entity.HasMany(d => d.Usuarios).WithMany(p => p.Organizacoes)
+              .UsingEntity<Dictionary<string, object>>(
+                  "UserOrganizacao",
+                  r => r.HasOne<User>().WithMany()
+                      .HasForeignKey("Usuario")
+                      .OnDelete(DeleteBehavior.ClientCascade)
+                      .HasConstraintName("user_organizacao_usuario_fkey"),
+                  l => l.HasOne<OrgEntity>().WithMany()
+                      .HasForeignKey("Organizacao")
+                      .OnDelete(DeleteBehavior.ClientCascade)
+                      .HasConstraintName("user_organizacao_organizacao_fkey"),
+                  j =>
+                  {
+                    j.HasKey("Usuario", "Organizacao").HasName("user_organizacao_pkey");
+                    j.ToTable("user_organizacao");
+                    j.IndexerProperty<Guid>("Usuario");
+                    j.IndexerProperty<int>("Organizacao");
+                  });
+    });
 
     base.OnModelCreating(modelBuilder);
   }
 
-  public override int SaveChanges()
-  {
-    var modifiedEntities = ChangeTracker.Entries()
-      .Where(e => e.State == EntityState.Modified);
-
-    foreach (var entity in modifiedEntities)
-    {
-      if (entity.Property("UpdatedAt") is not null)
-      {
-        entity.Property("UpdatedAt").CurrentValue = new ZonedDateTime(Instant.FromDateTimeUtc(DateTime.UtcNow), DateTimeZone.Utc);
-      }
-    }
-
-    return base.SaveChanges();
-  }
+  // public override int SaveChanges()
+  // {
+  //   var modifiedEntities = ChangeTracker.Entries()
+  //     .Where(e => e.State == EntityState.Modified);
+  //
+  //   foreach (var entity in modifiedEntities)
+  //   {
+  //     if (entity.Property("UpdatedAt") is not null)
+  //     {
+  //       entity.Property("UpdatedAt").CurrentValue = new ZonedDateTime(Instant.FromDateTimeUtc(DateTime.UtcNow), DateTimeZone.Utc);
+  //     }
+  //   }
+  //
+  //   return base.SaveChanges();
+  // }
 }
 
-public class BaseEntity
+public class OrgEntity
 {
-  public ZonedDateTime CreatedAt { get; private set; } = new ZonedDateTime(Instant.FromDateTimeUtc(DateTime.UtcNow), DateTimeZone.Utc);
-  public ZonedDateTime UpdatedAt { get; private set; } = new ZonedDateTime(Instant.FromDateTimeUtc(DateTime.UtcNow), DateTimeZone.Utc);
-}
-
-public class OrgEntityTypeConfiguration : IEntityTypeConfiguration<OrgEntity>
-{
-    public void Configure(EntityTypeBuilder<OrgEntity> entity)
-    {
-      entity.Property(e => e.CreatedAt).ValueGeneratedOnAdd().HasDefaultValueSql("CURRENT_TIMESTAMP");
-      entity.Property(e => e.UpdatedAt).ValueGeneratedOnAdd().HasDefaultValueSql("CURRENT_TIMESTAMP");
-
-      entity.HasKey(e => e.Guid).HasName("organizacao_pkey");
-
-      entity.ToTable("organizacao");
-
-      entity.Property(e => e.Guid);
-
-      entity.Property(e => e.Nome)
-        .HasMaxLength(100);
-    }
-}
-
-public class OrgEntity : BaseEntity
-{
-  public Guid Guid { get; private set; } = Guid.CreateVersion7();
+  public int Id { get; private set; }
 
   public required string Nome { get; set; }
+
+  public virtual ICollection<User> Usuarios { get; set; } = [];
+}
+
+public class IdentityService(IHttpContextAccessor httpContextAccessor, UserManager<User> userManager)
+{
+  public int GetOrg()
+  {
+    var id_str = httpContextAccessor.HttpContext?.Request.Headers["org"];
+    if (id_str is null || !int.TryParse(id_str, out int id))
+    {
+      throw new Exception("Organização não definida ou inválida");
+    }
+    return id;
+  }
+
+  public string? GetUserId()
+  {
+    if (httpContextAccessor.HttpContext?.User is not null)
+    {
+      return userManager.GetUserId(httpContextAccessor.HttpContext.User);
+    }
+    return null;
+  }
 }

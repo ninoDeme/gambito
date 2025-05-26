@@ -13,12 +13,12 @@ export default defineNuxtConfig({
   ],
 
   i18n: {
-    defaultLocale: 'pt_br',
+    defaultLocale: "pt_br",
     locales: [
-      { code: 'en', name: 'English', file: 'en.json' },
-      { code: 'pt_br', name: 'Português', file: 'pt_br.json' },
-      { code: 'es', name: 'Español', file: 'es.json' },
-    ]
+      { code: "en", name: "English", file: "en.json" },
+      { code: "pt_br", name: "Português", file: "pt_br.json" },
+      { code: "es", name: "Español", file: "es.json" },
+    ],
   },
 
   devtools: {
@@ -51,7 +51,7 @@ export default defineNuxtConfig({
   // colorMode
   colorMode: {
     classSuffix: "",
-    storage: 'cookie'
+    storage: "cookie",
   },
 
   future: {
@@ -66,13 +66,20 @@ export default defineNuxtConfig({
     typedPages: true,
   },
 
-  compatibilityDate: "2024-08-14",
+  supabase: {
+    redirectOptions: {
+      login: "/login",
+      callback: "/confirm",
+      exclude: ["/", "/docs", "/docs/**", "/api/**"],
+      saveRedirectToCookie: true,
+    },
+  },
+
+  compatibilityDate: "2025-05-26",
 
   nitro: {
-    esbuild: {
-      options: {
-        target: "esnext",
-      },
+    experimental: {
+      openAPI: true,
     },
     // prerender: {
     //   crawlLinks: false,

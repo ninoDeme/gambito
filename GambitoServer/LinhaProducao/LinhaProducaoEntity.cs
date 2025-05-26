@@ -8,7 +8,7 @@ public partial class LinhaProducaoEntity
 
   public string? Descricao { get; set; }
 
-  public Guid Org { get; set; }
+  public int Org { get; set; }
 
   public virtual OrgEntity OrgNavigation { get; set; } = null!;
 
