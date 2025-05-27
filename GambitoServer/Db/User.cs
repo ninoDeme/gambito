@@ -1,9 +1,10 @@
+﻿using System;
+using System.Collections.Generic;
 using Microsoft.AspNetCore.Identity;
 
 namespace GambitoServer.Db;
 
-public class User : IdentityUser
+public partial class User: IdentityUser<Guid>
 {
-  public virtual ICollection<OrgEntity> Organizacoes { get; set; } = [];
-};
-
+    public virtual ICollection<Organizacao> Organizacaos { get; set; } = new List<Organizacao>();
+}

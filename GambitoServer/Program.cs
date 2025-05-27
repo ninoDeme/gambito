@@ -1,5 +1,5 @@
 using GambitoServer.Db;
-using GambitoServer.LinhaProducao;
+// using GambitoServer.LinhaProducao;
 using Microsoft.AspNetCore.Identity;
 using Scalar.AspNetCore;
 
@@ -10,8 +10,6 @@ builder.Services.ConfigureHttpJsonOptions(o =>
 {
   // o.SerializerOptions.ConfigureForNodaTime(DateTimeZoneProviders.Tzdb);
 });
-
-builder.Services.AddDbContext<GambitoContext>();
 
 builder.Services.AddControllers();
 builder.Services.AddProblemDetails();
@@ -31,8 +29,12 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddIdentityCore<User>()
   .AddEntityFrameworkStores<GambitoContext>()
-  .AddRoles<IdentityRole>()
+  // .AddRoles<IdentityRole>()
   .AddApiEndpoints();
+
+builder.Services.AddScoped<IdentityService>();
+
+builder.Services.AddDbContext<GambitoContext>();
 
 // Logging
 builder.Logging.ClearProviders();
@@ -87,11 +89,11 @@ app.MapGroup("api/auth").WithTags("Auth").MapIdentityApi<User>();
 
 app.MapControllers();
 
-app.MapLinhaProducaoEndpoints();
+// app.MapLinhaProducaoEndpoints();
 
 app.MapGroup("api/org").WithTags("Org").MapPost("{name}", (GambitoContext db, string name) =>
 {
-  var o = db.Org.First()!;
+  var o = db.Organizacaos.First()!;
   o.Nome = name;
   db.SaveChanges();
   return o;
@@ -99,11 +101,11 @@ app.MapGroup("api/org").WithTags("Org").MapPost("{name}", (GambitoContext db, st
 
 app.MapGroup("api/org").WithTags("Org").MapPost("", (GambitoContext db) =>
 {
-  var o = new OrgEntity
+  var o = new Organizacao
   {
     Nome = "Teste"
   };
-  db.Org.Add(o);
+  db.Organizacaos.Add(o);
   db.SaveChanges();
   return o;
 });
