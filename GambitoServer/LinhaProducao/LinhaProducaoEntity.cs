@@ -30,4 +30,3 @@ public record LinhaProducaoModel(int Id, string? Descricao)
   {
   }
 }
-

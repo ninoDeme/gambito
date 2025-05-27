@@ -66,6 +66,7 @@ USING ( organizacao in ( select organizacao from user_organizacao ) );
 CREATE TABLE pedido (
   id INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
   produto INT NOT NULL REFERENCES produto(id),
+  descricao VARCHAR(256),
   qtd_pecas INT NOT NULL
 );
 ALTER TABLE pedido ENABLE ROW LEVEL SECURITY;

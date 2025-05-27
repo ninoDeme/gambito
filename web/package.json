@@ -28,7 +28,8 @@
     "@iconify-json/lucide": "^1.2.42",
     "@internationalized/date": "^3.8.0",
     "@nuxtjs/supabase": "1.5.1",
-    "pinia": "^3.0.2"
+    "pinia": "^3.0.2",
+    "zod": "^3.25.29"
   },
   "devDependencies": {
     "@iconify-json/ri": "^1.2.5",
