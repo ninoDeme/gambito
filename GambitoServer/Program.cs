@@ -89,7 +89,7 @@ app.MapGroup("api/auth").WithTags("Auth").MapIdentityApi<User>();
 
 app.MapControllers();
 
-// app.MapLinhaProducaoEndpoints();
+app.MapLinhaProducaoEndpoints();
 
 app.MapGroup("api/org").WithTags("Org").MapPost("{name}", (GambitoContext db, string name) =>
 {

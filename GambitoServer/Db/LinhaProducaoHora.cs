@@ -8,7 +8,7 @@ public partial class LinhaProducaoHora
 {
     public int Id { get; set; }
 
-    public int LinhaProducao { get; set; }
+    public int LinhaProducaoDia { get; set; }
 
     public LocalDate? Data { get; set; }
 
@@ -24,7 +24,7 @@ public partial class LinhaProducaoHora
 
     public LocalTime? HoraFim { get; set; }
 
-    public virtual LinhaProducaoDium? LinhaProducaoDium { get; set; }
+    public virtual LinhaProducaoDia LinhaProducaoDiaNavigation { get; set; } = null!;
 
     public virtual ICollection<LinhaProducaoHoraDefeito> LinhaProducaoHoraDefeitos { get; set; } = new List<LinhaProducaoHoraDefeito>();
 

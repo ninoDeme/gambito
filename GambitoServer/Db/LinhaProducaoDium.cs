@@ -4,8 +4,10 @@ using NodaTime;
 
 namespace GambitoServer.Db;
 
-public partial class LinhaProducaoDium
+public partial class LinhaProducaoDia
 {
+    public int Id { get; set; }
+
     public int LinhaProducao { get; set; }
 
     public LocalDate Data { get; set; }

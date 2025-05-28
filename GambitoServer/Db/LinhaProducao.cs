@@ -3,15 +3,15 @@ using System.Collections.Generic;
 
 namespace GambitoServer.Db;
 
-public partial class LinhaProducao
+public partial class LinhaProducao: IHasOrg
 {
     public int Id { get; set; }
 
-    public int? Organizacao { get; set; }
+    public int Organizacao { get; set; }
 
     public string? Descricao { get; set; }
 
-    public virtual ICollection<LinhaProducaoDium> LinhaProducaoDia { get; set; } = new List<LinhaProducaoDium>();
+    public virtual ICollection<LinhaProducaoDia> LinhaProducaoDia { get; set; } = new List<LinhaProducaoDia>();
 
-    public virtual Organizacao? OrganizacaoNavigation { get; set; }
+    public virtual Organizacao OrganizacaoNavigation { get; set; } = null!;
 }

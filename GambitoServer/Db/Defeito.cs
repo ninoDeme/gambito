@@ -3,11 +3,11 @@ using System.Collections.Generic;
 
 namespace GambitoServer.Db;
 
-public partial class Defeito
+public partial class Defeito: IHasOrg
 {
     public int Id { get; set; }
 
-    public int? Organizacao { get; set; }
+    public int Organizacao { get; set; }
 
     public string Nome { get; set; } = null!;
 

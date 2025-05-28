@@ -3,15 +3,15 @@ using System.Collections.Generic;
 
 namespace GambitoServer.Db;
 
-public partial class Funcao
+public partial class Funcao: IHasOrg
 {
     public int Id { get; set; }
 
-    public int? Organizacao { get; set; }
+    public int Organizacao { get; set; }
 
     public string Nome { get; set; } = null!;
 
     public virtual ICollection<Funcionario> Funcionarios { get; set; } = new List<Funcionario>();
 
-    public virtual Organizacao? OrganizacaoNavigation { get; set; }
+    public virtual Organizacao OrganizacaoNavigation { get; set; } = null!;
 }

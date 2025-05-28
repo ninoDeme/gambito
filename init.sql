@@ -98,7 +98,7 @@ USING ( id in ( select organizacao from user_organizacao ) );
 
 CREATE TABLE funcao (
   id INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-  organizacao INT REFERENCES organizacao(id),
+  organizacao INT NOT NULL REFERENCES organizacao(id),
   nome VARCHAR(100) NOT NULL,
   UNIQUE (organizacao, nome)
 );
@@ -109,9 +109,9 @@ USING ( organizacao in ( select organizacao from user_organizacao ) );
 
 CREATE TABLE funcionario (
   id INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-  organizacao INT REFERENCES organizacao(id),
+  organizacao INT NOT NULL REFERENCES organizacao(id),
   nome VARCHAR(100) NOT NULL,
-  funcao INT REFERENCES funcao(id),
+  funcao INT NOT NULL REFERENCES funcao(id),
   encarregado INT REFERENCES funcionario(id),
   invativo BOOLEAN NOT NULL DEFAULT FALSE
 );
@@ -122,7 +122,7 @@ USING ( organizacao in ( select organizacao from user_organizacao ) );
 
 CREATE TABLE produto (
   id INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-  organizacao INT REFERENCES organizacao(id),
+  organizacao INT NOT NULL REFERENCES organizacao(id),
   nome VARCHAR(100) NOT NULL UNIQUE,
   tempo_peca INT NOT NULL
 );
@@ -133,7 +133,7 @@ USING ( organizacao in ( select organizacao from user_organizacao ) );
 
 CREATE TABLE etapa (
   id INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-  organizacao INT REFERENCES organizacao(id),
+  organizacao INT NOT NULL REFERENCES organizacao(id),
   nome VARCHAR(100) NOT NULL,
   UNIQUE (organizacao, nome)
 );
@@ -154,7 +154,7 @@ USING ( produto in ( select produto from produto ) );
 
 CREATE TABLE defeito (
   id INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-  organizacao INT REFERENCES organizacao(id),
+  organizacao INT NOT NULL REFERENCES organizacao(id),
   nome VARCHAR(50) NOT NULL UNIQUE
 );
 ALTER TABLE defeito ENABLE ROW LEVEL SECURITY;
@@ -164,7 +164,7 @@ USING ( organizacao in ( select organizacao from user_organizacao ) );
 
 CREATE TABLE linha_producao (
   id INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-  organizacao INT REFERENCES organizacao(id),
+  organizacao INT NOT NULL REFERENCES organizacao(id),
   descricao TEXT
 );
 ALTER TABLE linha_producao ENABLE ROW LEVEL SECURITY;
@@ -173,10 +173,12 @@ CREATE POLICY "Usuarios conseguem ver linhas de produção em suas organizaçõe
 USING ( organizacao in ( select organizacao from user_organizacao ) );
 
 CREATE TABLE linha_producao_dia (
+  id INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
   linha_producao INT NOT NULL REFERENCES linha_producao(id),
   data DATE,
+  nome VARCHAR(200),
   invativo BOOLEAN NOT NULL DEFAULT FALSE,
-  PRIMARY KEY (linha_producao, data)
+  UNIQUE (linha_producao, data)
 );
 ALTER TABLE linha_producao_dia ENABLE ROW LEVEL SECURITY;
 
@@ -187,8 +189,7 @@ CREATE TYPE tipo_hora AS ENUM ('HORA_EXTRA', 'BANCO_HORAS');
 
 CREATE TABLE linha_producao_hora (
   id INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,
-  linha_producao INT NOT NULL,
-  data DATE,
+  linha_producao_dia INT NOT NULL,
   hora TIME NOT NULL,
   pedido INT NOT NULL REFERENCES pedido(id),
   qtd_produzido INT,
@@ -196,12 +197,12 @@ CREATE TABLE linha_producao_hora (
   hora_ini TIME,
   hora_fim TIME,
   tipo TIPO_HORA,
-  FOREIGN KEY(linha_producao, data) REFERENCES linha_producao_dia(linha_producao, data)
+  FOREIGN KEY(linha_producao_dia) REFERENCES linha_producao_dia
 );
 ALTER TABLE linha_producao_hora ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Usuarios conseguem ver linhas de produção em suas organizações" ON linha_producao_hora
-USING ( linha_producao in ( select id from linha_producao ) );
+USING ( linha_producao_dia in ( select id from linha_producao_dia ) );
 
 CREATE TABLE linha_producao_hora_etapa (
   id INT PRIMARY KEY GENERATED ALWAYS AS IDENTITY,

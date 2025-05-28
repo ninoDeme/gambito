@@ -14,8 +14,13 @@ using GUserLogin = IdentityUserLogin<Guid>;
 using GRoleClaim = IdentityRoleClaim<Guid>;
 using GUserToken = IdentityUserToken<Guid>;
 
-public partial class GambitoContext
-  : DbContext
+
+public interface IHasOrg
+{
+  int Organizacao { get; set; }
+}
+
+public partial class GambitoContext : DbContext
 {
 
   private readonly IdentityService _identity;
@@ -31,6 +36,8 @@ public partial class GambitoContext
     _identity = identity;
   }
 
+  public bool FiltraOrg(IHasOrg entity) => entity.Organizacao == _identity.GetOrg();
+
   public virtual DbSet<Defeito> Defeitos { get; set; }
 
   public virtual DbSet<Etapa> Etapas { get; set; }
@@ -41,7 +48,7 @@ public partial class GambitoContext
 
   public virtual DbSet<LinhaProducao> LinhaProducaos { get; set; }
 
-  public virtual DbSet<LinhaProducaoDium> LinhaProducaoDia { get; set; }
+  public virtual DbSet<LinhaProducaoDia> LinhaProducaoDia { get; set; }
 
   public virtual DbSet<LinhaProducaoHora> LinhaProducaoHoras { get; set; }
 
@@ -203,6 +210,8 @@ public partial class GambitoContext
       entity.HasOne(d => d.OrganizacaoNavigation).WithMany(p => p.Defeitos)
               .HasForeignKey(d => d.Organizacao)
               .HasConstraintName("defeito_organizacao_fkey");
+
+      entity.HasQueryFilter((l) => FiltraOrg(l));
     });
 
     modelBuilder.Entity<Etapa>(entity =>
@@ -224,6 +233,8 @@ public partial class GambitoContext
       entity.HasOne(d => d.OrganizacaoNavigation).WithMany(p => p.Etapas)
               .HasForeignKey(d => d.Organizacao)
               .HasConstraintName("etapa_organizacao_fkey");
+
+      entity.HasQueryFilter((l) => FiltraOrg(l));
     });
 
     modelBuilder.Entity<Funcao>(entity =>
@@ -245,6 +256,8 @@ public partial class GambitoContext
       entity.HasOne(d => d.OrganizacaoNavigation).WithMany(p => p.Funcaos)
               .HasForeignKey(d => d.Organizacao)
               .HasConstraintName("funcao_organizacao_fkey");
+
+      entity.HasQueryFilter((l) => FiltraOrg(l));
     });
 
     modelBuilder.Entity<Funcionario>(entity =>
@@ -277,6 +290,8 @@ public partial class GambitoContext
       entity.HasOne(d => d.OrganizacaoNavigation).WithMany(p => p.Funcionarios)
               .HasForeignKey(d => d.Organizacao)
               .HasConstraintName("funcionario_organizacao_fkey");
+
+      entity.HasQueryFilter((l) => FiltraOrg(l));
     });
 
     modelBuilder.Entity<LinhaProducao>(entity =>
@@ -294,13 +309,17 @@ public partial class GambitoContext
       entity.HasOne(d => d.OrganizacaoNavigation).WithMany(p => p.LinhaProducaos)
               .HasForeignKey(d => d.Organizacao)
               .HasConstraintName("linha_producao_organizacao_fkey");
+
+      entity.HasQueryFilter((l) => FiltraOrg(l));
     });
 
-    modelBuilder.Entity<LinhaProducaoDium>(entity =>
+    modelBuilder.Entity<LinhaProducaoDia>(entity =>
     {
-      entity.HasKey(e => new { e.LinhaProducao, e.Data }).HasName("linha_producao_dia_pkey");
+      entity.HasKey(e => e.LinhaProducao).HasName("linha_producao_dia_pkey");
 
       entity.ToTable("linha_producao_dia");
+
+      entity.Property(e => e.LinhaProducao).UseIdentityAlwaysColumn().HasColumnName("linha_producao");
 
       entity.Property(e => e.LinhaProducao).HasColumnName("linha_producao");
       entity.Property(e => e.Data).HasColumnName("data");
@@ -333,7 +352,7 @@ public partial class GambitoContext
       entity.Property(e => e.HoraIni)
               .HasColumnType("time without time zone")
               .HasColumnName("hora_ini");
-      entity.Property(e => e.LinhaProducao).HasColumnName("linha_producao");
+      entity.Property(e => e.LinhaProducaoDia).HasColumnName("linha_producao_dia");
       entity.Property(e => e.Paralizacao)
               .HasDefaultValue(false)
               .HasColumnName("paralizacao");
@@ -345,8 +364,8 @@ public partial class GambitoContext
               .OnDelete(DeleteBehavior.ClientSetNull)
               .HasConstraintName("linha_producao_hora_pedido_fkey");
 
-      entity.HasOne(d => d.LinhaProducaoDium).WithMany(p => p.LinhaProducaoHoras)
-              .HasForeignKey(d => new { d.LinhaProducao, d.Data })
+      entity.HasOne(d => d.LinhaProducaoDiaNavigation).WithMany(p => p.LinhaProducaoHoras)
+              .HasForeignKey(d => d.LinhaProducaoDia)
               .HasConstraintName("linha_producao_hora_linha_producao_data_fkey");
     });
 
@@ -410,11 +429,11 @@ public partial class GambitoContext
                       .HasConstraintName("linha_producao_hora_etapa_funcio_linha_producao_hora_etapa_fkey"),
                   j =>
                   {
-                  j.HasKey("LinhaProducaoHoraEtapa", "Funcionario").HasName("linha_producao_hora_etapa_funcionario_pkey");
-                  j.ToTable("linha_producao_hora_etapa_funcionario");
-                  j.IndexerProperty<int>("LinhaProducaoHoraEtapa").HasColumnName("linha_producao_hora_etapa");
-                  j.IndexerProperty<int>("Funcionario").HasColumnName("funcionario");
-                });
+                    j.HasKey("LinhaProducaoHoraEtapa", "Funcionario").HasName("linha_producao_hora_etapa_funcionario_pkey");
+                    j.ToTable("linha_producao_hora_etapa_funcionario");
+                    j.IndexerProperty<int>("LinhaProducaoHoraEtapa").HasColumnName("linha_producao_hora_etapa");
+                    j.IndexerProperty<int>("Funcionario").HasColumnName("funcionario");
+                  });
     });
 
     modelBuilder.Entity<Organizacao>(entity =>
@@ -485,11 +504,11 @@ public partial class GambitoContext
                       .HasConstraintName("user_organizacao_usuario_fkey"),
                   j =>
                   {
-                  j.HasKey("Usuario", "Organizacao").HasName("user_organizacao_pkey");
-                  j.ToTable("user_organizacao");
-                  j.IndexerProperty<Guid>("Usuario").HasColumnName("usuario");
-                  j.IndexerProperty<int>("Organizacao").HasColumnName("organizacao");
-                });
+                    j.HasKey("Usuario", "Organizacao").HasName("user_organizacao_pkey");
+                    j.ToTable("user_organizacao");
+                    j.IndexerProperty<Guid>("Usuario").HasColumnName("usuario");
+                    j.IndexerProperty<int>("Organizacao").HasColumnName("organizacao");
+                  });
     });
 
 
@@ -513,19 +532,19 @@ public partial class GambitoContext
   //   return base.SaveChanges();
   // }
 }
-
-public class SessionIterceptor(IServiceProvider serviceProvider): DbConnectionInterceptor
-{
-    // readonly IHttpContextAccessor _httpContextAccessor = serviceProvider.GetService<IHttpContextAccessor>()!;
-    public override void ConnectionOpened(DbConnection connection, ConnectionEndEventData eventData)
-    {
-        var conn = (NpgsqlConnection)connection;
-        var qry = conn.CreateCommand();
-        qry.CommandText = "TODO! SET SESSION AUTH";
-        qry.ExecuteNonQuery();
-        base.ConnectionOpened(connection, eventData);
-    }
-}
+//
+// public class SessionIterceptor(IServiceProvider serviceProvider): DbConnectionInterceptor
+// {
+//     // readonly IHttpContextAccessor _httpContextAccessor = serviceProvider.GetService<IHttpContextAccessor>()!;
+//     public override void ConnectionOpened(DbConnection connection, ConnectionEndEventData eventData)
+//     {
+//         var conn = (NpgsqlConnection)connection;
+//         var qry = conn.CreateCommand();
+//         qry.CommandText = "TODO! SET SESSION AUTH";
+//         qry.ExecuteNonQuery();
+//         base.ConnectionOpened(connection, eventData);
+//     }
+// }
 
 public class IdentityService(IServiceProvider serviceProvider)
 {
