@@ -13,7 +13,7 @@ public partial class Produto
 
     public int TempoPeca { get; set; }
 
-    public virtual Organizacao OrganizacaoNavigation { get; set; } = null!
+    public virtual Organizacao OrganizacaoNavigation { get; set; } = null!;
 
     public virtual ICollection<Pedido> Pedidos { get; set; } = new List<Pedido>();
 }

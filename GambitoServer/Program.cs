@@ -1,4 +1,6 @@
 using GambitoServer.Db;
+using GambitoServer.LinhaProducaoDomain;
+
 // using GambitoServer.LinhaProducao;
 using Microsoft.AspNetCore.Identity;
 using Scalar.AspNetCore;
@@ -19,18 +21,53 @@ builder.Services.AddAntiforgery();
 // Localization
 builder.Services.AddLocalization();
 
-builder.Services.AddAuthorization();
-builder.Services.AddAuthentication().AddCookie(IdentityConstants.ApplicationScheme);
+// builder.Services.AddAuthorization(options => {
+//     options.DefaultPolicy
+//     });
+builder.Services.AddAuthentication()
+  .AddCookie(IdentityConstants.TwoFactorRememberMeScheme)
+  .AddCookie(IdentityConstants.ApplicationScheme)
+  .AddCookie(IdentityConstants.BearerScheme);
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+  // Cookie settings
+  options.Cookie.HttpOnly = false;
+  options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
+  options.Cookie.Name = "gb-auth";
+
+  options.LoginPath = "/login";
+  options.AccessDeniedPath = "/acesso-negado";
+  options.SlidingExpiration = true;
+});
+
+builder.Services.AddIdentityCore<User>(options =>
+{
+  options.Password.RequireDigit = false;
+  options.Password.RequireLowercase = false;
+  options.Password.RequireNonAlphanumeric = false;
+  options.Password.RequireUppercase = false;
+  options.Password.RequiredLength = 6;
+  options.Password.RequiredUniqueChars = 2;
+
+  // Lockout settings.
+  options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+  options.Lockout.MaxFailedAccessAttempts = 5;
+  options.Lockout.AllowedForNewUsers = true;
+
+  // User settings.
+  options.User.AllowedUserNameCharacters =
+  "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
+  options.User.RequireUniqueEmail = true;
+})
+  .AddEntityFrameworkStores<GambitoContext>()
+  // .AddRoles<IdentityRole>()
+  .AddApiEndpoints();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddOpenApi();
-
-builder.Services.AddIdentityCore<User>()
-  .AddEntityFrameworkStores<GambitoContext>()
-  // .AddRoles<IdentityRole>()
-  .AddApiEndpoints();
 
 builder.Services.AddScoped<IdentityService>();
 
@@ -91,23 +128,23 @@ app.MapControllers();
 
 app.MapLinhaProducaoEndpoints();
 
-app.MapGroup("api/org").WithTags("Org").MapPost("{name}", (GambitoContext db, string name) =>
-{
-  var o = db.Organizacaos.First()!;
-  o.Nome = name;
-  db.SaveChanges();
-  return o;
-});
-
-app.MapGroup("api/org").WithTags("Org").MapPost("", (GambitoContext db) =>
-{
-  var o = new Organizacao
-  {
-    Nome = "Teste"
-  };
-  db.Organizacaos.Add(o);
-  db.SaveChanges();
-  return o;
-});
+// app.MapGroup("api/org").WithTags("Org").MapPost("{name}", (GambitoContext db, string name) =>
+// {
+//   var o = db.Organizacaos.First()!;
+//   o.Nome = name;
+//   db.SaveChanges();
+//   return o;
+// });
+//
+// app.MapGroup("api/org").WithTags("Org").MapPost("", (GambitoContext db) =>
+// {
+//   var o = new Organizacao
+//   {
+//     Nome = "Teste"
+//   };
+//   db.Organizacaos.Add(o);
+//   db.SaveChanges();
+//   return o;
+// });
 
 app.Run();
