@@ -36,7 +36,7 @@ public partial class GambitoContext : DbContext
     _identity = identity;
   }
 
-  public bool FiltraOrg(IHasOrg entity) => entity.Organizacao == _identity.GetOrg();
+  // public bool FiltraOrg(IHasOrg entity) => entity.Organizacao == _identity.GetOrg();
 
   public virtual DbSet<Defeito> Defeitos { get; set; }
 
@@ -211,7 +211,7 @@ public partial class GambitoContext : DbContext
               .HasForeignKey(d => d.Organizacao)
               .HasConstraintName("defeito_organizacao_fkey");
 
-      entity.HasQueryFilter((l) => FiltraOrg(l));
+      entity.HasQueryFilter((l) => l.Organizacao == _identity.GetOrg());
     });
 
     modelBuilder.Entity<Etapa>(entity =>
@@ -234,7 +234,7 @@ public partial class GambitoContext : DbContext
               .HasForeignKey(d => d.Organizacao)
               .HasConstraintName("etapa_organizacao_fkey");
 
-      entity.HasQueryFilter((l) => FiltraOrg(l));
+      entity.HasQueryFilter((l) => _identity.GetOrg() == null || l.Organizacao == _identity.GetOrg());
     });
 
     modelBuilder.Entity<Funcao>(entity =>
@@ -257,7 +257,7 @@ public partial class GambitoContext : DbContext
               .HasForeignKey(d => d.Organizacao)
               .HasConstraintName("funcao_organizacao_fkey");
 
-      entity.HasQueryFilter((l) => FiltraOrg(l));
+      entity.HasQueryFilter((l) => _identity.GetOrg() == null || l.Organizacao == _identity.GetOrg());
     });
 
     modelBuilder.Entity<Funcionario>(entity =>
@@ -291,7 +291,7 @@ public partial class GambitoContext : DbContext
               .HasForeignKey(d => d.Organizacao)
               .HasConstraintName("funcionario_organizacao_fkey");
 
-      entity.HasQueryFilter((l) => FiltraOrg(l));
+      entity.HasQueryFilter((l) => _identity.GetOrg() == null || l.Organizacao == _identity.GetOrg());
     });
 
     modelBuilder.Entity<LinhaProducao>(entity =>
@@ -310,7 +310,7 @@ public partial class GambitoContext : DbContext
               .HasForeignKey(d => d.Organizacao)
               .HasConstraintName("linha_producao_organizacao_fkey");
 
-      entity.HasQueryFilter((l) => FiltraOrg(l));
+      entity.HasQueryFilter((l) => _identity.GetOrg() == null || l.Organizacao == _identity.GetOrg());
     });
 
     modelBuilder.Entity<LinhaProducaoDia>(entity =>
@@ -549,9 +549,10 @@ public partial class GambitoContext : DbContext
 public class IdentityService(IServiceProvider serviceProvider)
 {
   readonly IHttpContextAccessor _httpContextAccessor = serviceProvider.GetService<IHttpContextAccessor>()!;
-  public int GetOrg()
+  public int? GetOrg()
   {
     var id_str = _httpContextAccessor.HttpContext?.Request.Headers["org"];
+    if (id_str is null || id_str.ToString() == "") return null;
     if (id_str is null || !int.TryParse(id_str, out int id))
     {
       throw new Exception("Organização não definida ou inválida");

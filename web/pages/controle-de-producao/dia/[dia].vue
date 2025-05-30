@@ -2,6 +2,11 @@
 import { UButton } from "#components";
 import { parseDate } from "@internationalized/date";
 import type { TableColumn } from "@nuxt/ui";
+import {
+  linhaProducaoDiaDtoBase,
+  linhaProducaoDtoGet,
+} from "~/shared/models/linha-producao";
+import * as z from "zod";
 
 const localePath = useLocalePath();
 const localeRoute = useLocaleRoute();
@@ -9,14 +14,15 @@ const localeRoute = useLocaleRoute();
 const route = localeRoute("controle-de-producao-dia-dia")!;
 const diaAtual = parseDate(route.params.dia);
 const { data, status, error, refresh, clear } = await useFetch(
-  `/api/dia/${diaAtual}`,
+  `/api/linha-producao/${diaAtual}`,
+  {
+    transform: (val) => z.array(linhaProducaoDtoGet).parseAsync(val),
+  },
 );
 
-const columns: TableColumn<{
-  id: number;
-  date: string | undefined;
-  produto: number;
-}>[] = [
+const dias = computed(() => data.value?.flatMap((d) => d.dias));
+
+const columns: TableColumn<typeof linhaProducaoDiaDtoBase._type>[] = [
   {
     id: "actions",
     header: () => h("span", { class: "w-max" }, "Ações"),
@@ -38,7 +44,7 @@ const columns: TableColumn<{
     cell: ({ row }) => `#${row.getValue("id")}`,
   },
   {
-    accessorKey: "date",
+    accessorKey: "data",
     header: "Date",
     cell: ({ row }) => {
       return new Date(row.getValue("date")).toLocaleString("pt-BR", {
@@ -46,11 +52,11 @@ const columns: TableColumn<{
       });
     },
   },
-  {
-    accessorKey: "produto",
-    header: "Produto",
-    cell: ({ row }) => row.getValue("produto"),
-  },
+  // {
+  //   accessorKey: "produto",
+  //   header: "Produto",
+  //   cell: ({ row }) => row.getValue("produto"),
+  // },
 ];
 
 const table = useTemplateRef("table");
@@ -105,7 +111,7 @@ const table = useTemplateRef("table");
 
     <UTable
       ref="table"
-      :data="data"
+      :data="dias"
       :columns="columns"
       sticky
       class="h-96 text-start"

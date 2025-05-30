@@ -9,7 +9,7 @@ export default defineNuxtConfig({
     "@nuxt/fonts",
     "@nuxt/icon",
     "@nuxtjs/i18n",
-    "@nuxtjs/supabase",
+    // "@nuxtjs/supabase",
   ],
 
   i18n: {
@@ -66,14 +66,14 @@ export default defineNuxtConfig({
     typedPages: true,
   },
 
-  supabase: {
-    redirectOptions: {
-      login: "/login",
-      callback: "/confirm",
-      exclude: ["/", "/docs", "/docs/**", "/api/**"],
-      saveRedirectToCookie: true,
-    },
-  },
+  // supabase: {
+  //   redirectOptions: {
+  //     login: "/login",
+  //     callback: "/confirm",
+  //     exclude: ["/", "/docs", "/docs/**", "/api/**"],
+  //     saveRedirectToCookie: true,
+  //   },
+  // },
 
   compatibilityDate: "2025-05-26",
 
@@ -86,5 +86,9 @@ export default defineNuxtConfig({
     //   routes: ['/'],
     //   ignore: ['/hi'],
     // },
+  },
+
+  routeRules: {
+    "/api/**": { proxy: "http://localhost:5165" },
   },
 });

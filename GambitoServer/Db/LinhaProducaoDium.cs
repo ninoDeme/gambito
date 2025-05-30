@@ -10,7 +10,7 @@ public partial class LinhaProducaoDia
 
     public int LinhaProducao { get; set; }
 
-    public LocalDate Data { get; set; }
+    public LocalDate? Data { get; set; }
 
     public bool Invativo { get; set; }
 

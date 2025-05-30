@@ -1,6 +1,7 @@
 import z from 'zod';
 
 export const linhaProducaoDiaDtoBase = z.object({
+  id: z.number().optional(),
   linhaProducao: z.number(),
   data: z.date().optional(),
   inativo: z.boolean()
@@ -9,6 +10,10 @@ export const linhaProducaoDiaDtoBase = z.object({
 export const linhaProducaoDtoBase = z.object({
   id: z.number().min(0).int().optional(),
   descricao: z.string().max(100),
+})
+
+export const linhaProducaoDtoGet = linhaProducaoDtoBase.extend({
+  dias: z.array(linhaProducaoDiaDtoBase)
 })
 
 export const linhaProducaoDtoPost = linhaProducaoDtoBase.extend({

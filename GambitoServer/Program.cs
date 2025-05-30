@@ -3,6 +3,7 @@ using GambitoServer.LinhaProducaoDomain;
 
 // using GambitoServer.LinhaProducao;
 using Microsoft.AspNetCore.Identity;
+using NodaTime.Serialization.SystemTextJson;
 using Scalar.AspNetCore;
 
 // var builder = WebApplication.CreateSlimBuilder(args);
@@ -10,7 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.ConfigureHttpJsonOptions(o =>
 {
-  // o.SerializerOptions.ConfigureForNodaTime(DateTimeZoneProviders.Tzdb);
+  o.SerializerOptions.ConfigureForNodaTime(NodaTime.DateTimeZoneProviders.Tzdb);
 });
 
 builder.Services.AddControllers();
