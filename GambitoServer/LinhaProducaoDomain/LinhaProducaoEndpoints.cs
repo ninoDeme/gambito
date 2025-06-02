@@ -12,45 +12,30 @@ public static class LinhaProducaoEndpoints
   {
     var group = router.MapGroup("api/linha-producao").WithTags("Linhas de Produção");
 
-    group.MapGet("/", async Task<Results<Ok<LinhaProducaoDtoGet[]>, ProblemHttpResult>> (GambitoContext db, [FromQuery(Name = "data")] string? Data, [FromQuery(Name = "data-fim")] string? DataFim) =>
+    group.MapGet("/", async Task<Results<Ok<LinhaProducaoDtoGetSummary[]>, ProblemHttpResult>> (GambitoContext db) =>
     {
 
-      LocalDate? parsed_data = null;
-      LocalDate? parsed_data_fim = null;
-      if (Data is not null and not "null")
-      {
-        var parse_result = NodaTime.Text.LocalDatePattern.Iso.Parse(Data);
-        if (!parse_result.Success)
-        {
-          return TypedResults.Problem("Invalid Date");
-        }
-        parsed_data = parse_result.Value;
-      }
-      if (DataFim is not null)
-      {
-        var parse_result = NodaTime.Text.LocalDatePattern.Iso.Parse(DataFim);
-        if (!parse_result.Success)
-        {
-          return TypedResults.Problem("Invalid Date");
-        }
-        parsed_data_fim = parse_result.Value;
-      }
-      if (parsed_data_fim is not null && parsed_data is null)
-      {
-        return TypedResults.Problem("data-fim informado sem data inícial");
-      }
-      var builder = db.LinhaProducaos
-            .Include(l => l.LinhaProducaoDia.Where(d => parsed_data_fim == null ? (Data == null || d.Data == parsed_data) : (d.Data != null && d.Data >= parsed_data && d.Data < parsed_data_fim)));
+      // LocalDate? parsed_data = null;
+      // if (Data is not null and not "null")
+      // {
+      //   var parse_result = NodaTime.Text.LocalDatePattern.Iso.Parse(Data);
+      //   if (!parse_result.Success)
+      //   {
+      //     return TypedResults.Problem("Invalid Date");
+      //   }
+      //   parsed_data = parse_result.Value;
+      // }
+      var builder = db.LinhaProducaos;
       // .Where(l => Data == null || l.LinhaProducaoDia.Count > 0);
       var res = await builder.ToListAsync();
-      if (Data is not null)
-      {
-        res = [.. res.Where(l => l.LinhaProducaoDia.Count > 0)];
-      }
-      return TypedResults.Ok(res.Select(l => new LinhaProducaoDtoGet(
+      // if (Data is not null)
+      // {
+      //   res = [.. res.Where(l => l.LinhaProducaoDia.Count > 0)];
+      // }
+      return TypedResults.Ok(res.Select(l => new LinhaProducaoDtoGetSummary(
         l.Id,
-        l.Descricao,
-        l.LinhaProducaoDia.Select(d => new LinhaProducaoDiaDtoGet(d)).ToArray()
+        l.Descricao
+      // l.LinhaProducaoDia.Select(d => new LinhaProducaoDiaDtoGet(d)).ToArray()
       )).ToArray());
     });
 
@@ -95,13 +80,40 @@ public static class LinhaProducaoEndpoints
       await db.SaveChangesAsync();
       return TypedResults.Created($"api/linha-producao/{res.Id}", new LinhaProducaoDtoGetSummary(res.Id, res.Descricao));
     });
-    var dias = group.MapGroup("/{linha_producao}/dia");
+    var dias = group.MapGroup("/");
 
-    dias.MapGet("/", async Task<Results<Ok<LinhaProducaoDiaDtoGet[]>, NotFound>> (int linha_producao, GambitoContext db) =>
+    dias.MapGet("/dia/{data}", async Task<Results<Ok<LinhaProducaoDiaDtoGetDetailed[]>, ProblemHttpResult>> (string data, GambitoContext db) =>
         {
+          LocalDate? parsed_data = null;
+          if (data is not "null")
+          {
+            var parse_result = NodaTime.Text.LocalDatePattern.Iso.Parse(data);
+            if (!parse_result.Success)
+            {
+              return TypedResults.Problem("Invalid Date");
+            }
+            parsed_data = parse_result.Value;
+          }
           var res = await db.LinhaProducaoDia
-            .Where(l => l.LinhaProducao == linha_producao)
-            .Select(l => new LinhaProducaoDiaDtoGet(l.Id, l.LinhaProducao, l.Data, l.Invativo))
+            .Where(d => d.Data == parsed_data)
+            .Select(l => new LinhaProducaoDiaDtoGetDetailed(
+              l.Id,
+              l.LinhaProducao,
+              l.Data,
+              l.Invativo,
+              l.LinhaProducaoHoras.GroupBy(h => h.ProdutoConfig).Select((h) => new LinhaProducaoDiaProdutoConfDto(
+                h.SelectMany(he => he.LinhaProducaoHoraEtapas).SelectMany(e => e.Funcionarios).Distinct().Count(),
+                // h.PedidoNavigation.ProdutoNavigation.Id
+                h.First().ProdutoConfigNavigation.ProdutoNavigation.Nome,
+                h.First().ProdutoConfigNavigation.ProdutoConfigEtapas.Sum(e => e.Segundos),
+                h.Sum(hp => hp.LinhaProducaoHoraEtapas
+                  .Sum(int (hpe) => hpe.Funcionarios.Count * h.First().ProdutoConfigNavigation.ProdutoConfigEtapas.Sum(int (e) => e.Segundos))
+                ),
+                h.Sum(hp => hp.QtdProduzido ?? 0),
+                h.Sum(hp => hp.LinhaProducaoHoraDefeitos.Where(hd => hd.Retrabalhado).Sum(int (hd) => hd.QtdPecas))
+              )).ToArray()
+            // l.LinhaProducaoHoras.Max
+            ))
             .ToArrayAsync();
           return TypedResults.Ok(res);
         });
@@ -121,6 +133,31 @@ public record LinhaProducaoDtoCreateUpdate(string? Descricao)
     Descricao = Descricao
   };
 }
+
+public record LinhaProducaoDiaProdutoConfDto(
+  int QtdCostureiros, // Total de costureiros unicos no dia
+  string NomePeca,
+  int TempoPeca,
+  // meta por funcionario = 60/tempo
+  int MetaDiaPeca, // Soma de todas as metas do dia
+  int QtdPeca,
+  int RetrabalhoDiaPeca
+);
+
+public record LinhaProducaoDiaDtoGetDetailed(
+  int Id,
+  int LinhaProducao,
+  LocalDate? Data,
+  bool Invativo,
+  LinhaProducaoDiaProdutoConfDto[] DetalhesPedido
+)
+
+{
+  public int Id { get; set; } = Id;
+  public int LinhaProducao { get; set; } = LinhaProducao;
+  public LocalDate? Data { get; set; } = Data;
+  public bool Invativo { get; set; } = Invativo;
+};
 
 public class LinhaProducaoDiaDtoGet(int Id, int LinhaProducao, LocalDate? Data, bool Invativo)
 {

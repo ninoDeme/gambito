@@ -25,6 +25,10 @@ export default defineNuxtConfig({
     enabled: true,
   },
 
+  icon: {
+    localApiEndpoint: "/_nuxt_icon"
+  },
+
   app: {
     // head
     head: {
@@ -89,6 +93,6 @@ export default defineNuxtConfig({
   },
 
   routeRules: {
-    "/api/**": { proxy: "http://localhost:5165" },
+    "/api/**": { proxy: "http://localhost:5165/api/**" },
   },
 });

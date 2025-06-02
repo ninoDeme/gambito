@@ -13,5 +13,7 @@ public partial class Etapa: IHasOrg
 
     public virtual ICollection<LinhaProducaoHoraEtapa> LinhaProducaoHoraEtapas { get; set; } = new List<LinhaProducaoHoraEtapa>();
 
+    public virtual ICollection<ProdutoConfigEtapa> ProdutoConfigEtapas { get; set; } = new List<ProdutoConfigEtapa>();
+
     public virtual Organizacao OrganizacaoNavigation { get; set; } = null!;
 }

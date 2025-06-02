@@ -1,3 +1,4 @@
+using System.Text.Json;
 using GambitoServer.Db;
 using GambitoServer.LinhaProducaoDomain;
 
@@ -11,6 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.ConfigureHttpJsonOptions(o =>
 {
+  o.SerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower;
   o.SerializerOptions.ConfigureForNodaTime(NodaTime.DateTimeZoneProviders.Tzdb);
 });
 
@@ -66,7 +68,6 @@ builder.Services.AddIdentityCore<User>(options =>
   .AddApiEndpoints();
 
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
 builder.Services.AddOpenApi();
 
@@ -94,9 +95,6 @@ app.UseRequestLocalization();
 
 if (app.Environment.IsDevelopment())
 {
-  app.UseSwagger();
-  app.UseSwaggerUI();
-
   app.MapOpenApi();
   app.MapScalarApiReference();
 

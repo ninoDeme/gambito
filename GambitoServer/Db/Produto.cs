@@ -15,5 +15,5 @@ public partial class Produto
 
     public virtual Organizacao OrganizacaoNavigation { get; set; } = null!;
 
-    public virtual ICollection<Pedido> Pedidos { get; set; } = new List<Pedido>();
+    public virtual ICollection<ProdutoConfig> Pedidos { get; set; } = new List<ProdutoConfig>();
 }

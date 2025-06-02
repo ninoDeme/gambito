@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using NodaTime;
 
@@ -10,11 +11,9 @@ public partial class LinhaProducaoHora
 
     public int LinhaProducaoDia { get; set; }
 
-    public LocalDate? Data { get; set; }
-
     public LocalTime Hora { get; set; }
 
-    public int Pedido { get; set; }
+    public int ProdutoConfig { get; set; }
 
     public int? QtdProduzido { get; set; }
 
@@ -30,5 +29,5 @@ public partial class LinhaProducaoHora
 
     public virtual ICollection<LinhaProducaoHoraEtapa> LinhaProducaoHoraEtapas { get; set; } = new List<LinhaProducaoHoraEtapa>();
 
-    public virtual Pedido PedidoNavigation { get; set; } = null!;
+    public virtual ProdutoConfig ProdutoConfigNavigation { get; set; } = null!;
 }

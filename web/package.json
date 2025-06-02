@@ -25,15 +25,15 @@
     "supabase-gen": "supabase gen types --lang=typescript --local > types/database.types.ts"
   },
   "dependencies": {
-    "@iconify-json/lucide": "^1.2.42",
-    "@internationalized/date": "^3.8.0",
+    "@iconify-json/lucide": "^1.2.45",
+    "@internationalized/date": "^3.8.1",
     "@nuxtjs/supabase": "1.5.1",
     "pinia": "^3.0.2",
-    "zod": "^3.25.29"
+    "zod": "^3.25.48"
   },
   "devDependencies": {
     "@iconify-json/ri": "^1.2.5",
-    "@nuxt/eslint": "^1.2.0",
+    "@nuxt/eslint": "^1.4.1",
     "@nuxt/fonts": "0.11.3",
     "@nuxt/icon": "1.12.0",
     "@nuxt/ui": "3.1.1",
@@ -42,11 +42,11 @@
     "@nuxtjs/tailwindcss": "6.14.0",
     "@pinia/nuxt": "^0.10.1",
     "@scalar/nuxt": "0.4.3",
-    "@vueuse/nuxt": "^13.0.0",
-    "eslint": "^9.22.0",
-    "nuxt": "^3.16.0",
+    "@vueuse/nuxt": "^13.3.0",
+    "eslint": "^9.28.0",
+    "nuxt": "^3.17.4",
     "supabase": "^2.23.4",
-    "typescript": "^5.8.2",
-    "vue-tsc": "^2.2.8"
+    "typescript": "^5.8.3",
+    "vue-tsc": "^2.2.10"
   }
 }
