@@ -1,0 +1,37 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "shell build Server",
+			"type": "shell",
+			"command": "dotnet build --project GambitoServer/GambitoServer.csproj",
+			"problemMatcher": []
+		},
+		{
+			"label": "shell watch Server",
+			"type": "shell",
+			"command": "dotnet watch --project GambitoServer/GambitoServer.csproj",
+			"problemMatcher": []
+		},
+		{
+			"type": "dotnet",
+			"task": "watch GambitoServer",
+			"file": "GambitoServer/GambitoServer.csproj",
+			"problemMatcher": [],
+			"label": "dotnet: watch GambitoServer"
+		},
+		{
+			"type": "npm",
+			"script": "dev",
+			"path": "web",
+			"problemMatcher": [],
+			"label": "npm: dev - web",
+			"detail": "nuxi dev --dotenv ../.env"
+		},
+		{
+			"type": "shell",
+			"command": "docker compose up",
+			"label": "run database"
+		}
+	]
+}

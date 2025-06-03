@@ -189,7 +189,8 @@ const tableApi = useVueTable({
             :key="cell.id"
             :hidden="(cell.column.columnDef?.meta as any)?.['enableRowspan'] && row.original.rowspan === 0"
             :rowspan="(cell.column.columnDef?.meta as any)?.['enableRowspan'] ? row.original.rowspan : 1"
-            class="p-2 text-sm whitespace-nowrap [&:has([role=checkbox])]:pe-0 border-default border-b"
+            :class="{'border-default border-b': row.original.rowspan === 0}"
+            class="p-2 text-sm whitespace-nowrap [&:has([role=checkbox])]:pe-0"
           >
             <FlexRender
               :render="cell.column.columnDef.cell"

@@ -1,8 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Npgsql;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore.Diagnostics;
-using System.Data.Common;
 using NodaTime;
 
 namespace GambitoServer.Db;
@@ -71,7 +69,7 @@ public class GambitoContext : DbContext
   {
     optionsBuilder
       .UseNpgsql(
-        "Host=localhost:15432;Username=postgres;Password=postgres;Database=gambito",
+        $"Host=localhost:15432;Username=postgres;Password=postgres;Database=gambito",
         o => o.MapEnum<TipoHora>("tipo_hora").UseNodaTime())
       .UseSnakeCaseNamingConvention();
   }
