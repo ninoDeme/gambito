@@ -23,7 +23,9 @@
 		{
 			"type": "npm",
 			"script": "dev",
-			"path": "web",
+			"options": {
+        "cwd": "web"
+      },
 			"problemMatcher": [],
 			"label": "npm: dev - web",
 			"detail": "nuxi dev --dotenv ../.env"

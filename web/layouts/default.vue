@@ -12,9 +12,9 @@ const locales2 = computed(() =>
       <div class="flex flex-row items-center p-2 container mx-auto">
         <div class="min-w-1/4">
           <UButton
-            :variant="'link'"
-            :color="'neutral'"
-            :active-color="'primary'"
+            variant="link"
+            color="neutral"
+            active-color="primary"
             :to="localePath('index')"
           >
             (Logo)
@@ -23,8 +23,9 @@ const locales2 = computed(() =>
         <div class="flex-1"></div>
         <UButton
           variant="ghost"
-          color="primary"
-          active-variant="subtle"
+          color="neutral"
+          active-variant="ghost"
+          active-color="primary"
           :to="localePath('controle-de-producao')"
         >
           {{ $t("controle-de-producao") }}

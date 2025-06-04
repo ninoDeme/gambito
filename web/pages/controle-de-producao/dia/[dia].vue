@@ -1,8 +1,18 @@
 <script setup lang="ts">
 import { UButton } from "#components";
-import { parseDate } from "@internationalized/date";
+import {
+  DateFormatter,
+  parseDate,
+  getLocalTimeZone,
+} from "@internationalized/date";
 import { LinhaProducaoDiaDtoGetDetailed } from "~/shared/models/linha-producao";
-import { getCoreRowModel, useVueTable, FlexRender, type ColumnDef, type RowData } from "@tanstack/vue-table";
+import {
+  getCoreRowModel,
+  useVueTable,
+  FlexRender,
+  type ColumnDef,
+  type RowData,
+} from "@tanstack/vue-table";
 import * as z from "zod";
 
 const localePath = useLocalePath();
@@ -18,51 +28,60 @@ const { data, status, error, refresh, clear } = await useFetch(
   },
 );
 
+const locale = useLocale();
+
+const formatedDate = computed(() =>
+  new DateFormatter(locale.code.value, { dateStyle: "short" }).format(
+    diaAtual.toDate(getLocalTimeZone()),
+  ),
+);
+
 const produtos = computed(() => {
-  return data.value
-    ?.map((d) => ({
-      ...d,
-      detalhes_pedido: [
-        ...d.detalhes_pedido,
-        ...d.detalhes_pedido,
-        ...d.detalhes_pedido,
-      ],
-    }))
-    ?.flatMap((d) =>
+  return (
+    data.value?.flatMap((d) =>
       d.detalhes_pedido.map((p, i) => ({
         ...p,
         ...d,
         rowspan: i === 0 ? d.detalhes_pedido.length : 0,
+        last: i === d.detalhes_pedido.length - 1,
         detalhes_pedido: undefined,
       })),
-    ) ?? [];
+    ) ?? []
+  );
 });
 
 effect(() => console.log(produtos.value));
 
 export type TableColumn<T extends RowData, D = unknown> = ColumnDef<T, D>;
 
-const columns: TableColumn<(typeof produtos.value)[0], {enableRowspan: boolean}>[] = [
+declare module "@tanstack/table-core" {
+  interface ColumnMeta<TData extends RowData, TValue> {
+    enableRowspan: boolean;
+  }
+}
+
+const columns: TableColumn<(typeof produtos.value)[0]>[] = [
   {
     id: "actions",
     header: () => h("span", {}, "Ações"),
     enableHiding: false,
+    meta: {
+      enableRowspan: true,
+    },
     enableSorting: false,
     cell: ({ row }) =>
       h(UButton, {
         to: localePath({
-          name: "controle-de-producao-linha-producao",
-          params: { codigo: row.getValue("id") },
+          name: "controle-de-producao-linha-producao-id",
+          params: { id: row.getValue("id") },
         }),
         label: "Editar",
       }),
-
   },
   {
     accessorKey: "linha_producao",
     id: "id",
     meta: {
-      // @ts-ignore
       enableRowspan: true,
     },
     header: "#",
@@ -102,7 +121,11 @@ const tableApi = useVueTable({
 });
 </script>
 <template>
-  <div class="flex-1 divide-y divide-accented w-full container mx-auto">
+  <div class="flex-1 w-full container mx-auto">
+    <h1 class="text-xl mt-4 mb-4">
+      Controle diário de produção -
+      {{ formatedDate }}
+    </h1>
     <div class="rounded border-red-500" v-if="error">
       {{ error.status }} - {{ error.message }}
     </div>
@@ -181,15 +204,25 @@ const tableApi = useVueTable({
         </tr>
       </thead>
       <tbody
-        class="divide-y divide-default [&>tr]:data-[selectable=true]:focus-visible:outline-primary"
+        class="[&>tr]:data-[selectable=true]:focus-visible:outline-primary"
       >
         <tr v-for="row in tableApi.getRowModel().rows" :key="row.id">
           <td
             v-for="cell in row.getVisibleCells()"
             :key="cell.id"
-            :hidden="(cell.column.columnDef?.meta as any)?.['enableRowspan'] && row.original.rowspan === 0"
-            :rowspan="(cell.column.columnDef?.meta as any)?.['enableRowspan'] ? row.original.rowspan : 1"
-            :class="{'border-default border-b': row.original.rowspan === 0}"
+            :hidden="
+              cell.column.columnDef?.meta?.enableRowspan &&
+              row.original.rowspan === 0
+            "
+            :rowspan="
+              cell.column.columnDef?.meta?.enableRowspan
+                ? row.original.rowspan
+                : 1
+            "
+            :class="{
+              'border-default border-b':
+                row.original.last || cell.column.columnDef?.meta?.enableRowspan,
+            }"
             class="p-2 text-sm whitespace-nowrap [&:has([role=checkbox])]:pe-0"
           >
             <FlexRender
@@ -200,59 +233,23 @@ const tableApi = useVueTable({
         </tr>
       </tbody>
       <tfoot>
-        <tr
-          v-for="footerGroup in tableApi.getFooterGroups()"
-          :key="footerGroup.id"
-        >
-          <th
-            v-for="header in footerGroup.headers"
-            :key="header.id"
-            :colSpan="header.colSpan"
-          >
-            <FlexRender
-              v-if="!header.isPlaceholder"
-              :render="header.column.columnDef.footer"
-              :props="header.getContext()"
-            />
-          </th>
+        <tr>
+          <td :colspan="tableApi.getAllColumns().length" class="w-full">
+            <NuxtLinkLocale :to="'controle-de-producao-linha-producao-novo'"
+              class="px-4 w-full flex flex-row items-center py-3 gap-2 group cursor-pointer"
+            >
+              <div
+                class="h-px bg-accented grow group-hover:h-0.5 group-hover:bg-white transition-[height_background]"
+              ></div>
+              <UIcon name="i-lucide-plus"></UIcon>
+              <span class="leading-none">Adicionar linha de produção</span>
+              <div
+                class="h-px bg-accented grow group-hover:h-0.5 group-hover:bg-white transition-[height_background]"
+              ></div>
+            </NuxtLinkLocale>
+          </td>
         </tr>
       </tfoot>
     </table>
-    <!--
-    <UTable
-      ref="table"
-      :data="produtos"
-      :columns="columns"
-      :grouping-options="grouping_options"
-      :grouping="grouping"
-      sticky
-      :expanded-options="exp_opts"
-      class="h-96 text-start"
-      :loading="status === 'pending'"
-      ,
-      :ui="{
-        root: 'min-w-full',
-        td: 'empty:p-0', // helps with the colspaned row added for expand slot
-      }"
-    >
-      <template #actions-cell="{ row }">
-        <div v-if="row.getIsGrouped()" class="flex items-center">
-          <span
-            class="inline-block"
-            :style="{ width: `calc(${row.depth} * 1rem)` }"
-          />
-
-          <UButton
-            variant="outline"
-            color="neutral"
-            class="mr-2"
-            size="xs"
-            :icon="row.getIsExpanded() ? 'i-lucide-minus' : 'i-lucide-plus'"
-            @click="row.toggleExpanded()"
-          />
-        </div>
-      </template>
-    </UTable>
- -->
   </div>
 </template>
