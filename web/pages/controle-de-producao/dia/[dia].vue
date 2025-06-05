@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { UButton } from "#components";
+import { UBadge, UButton } from "#components";
 import {
   DateFormatter,
   parseDate,
@@ -93,15 +93,6 @@ const columns: TableColumn<(typeof produtos.value)[0]>[] = [
     header: "Item",
     cell: ({ row }) => row.original.nome_peca,
   },
-  // {
-  //   accessorKey: "data",
-  //   header: "Date",
-  //   cell: ({ row }) => {
-  //     return new Date(row.getValue("date")).toLocaleString("pt-BR", {
-  //       dateStyle: "short",
-  //     });
-  //   },
-  // },
   {
     accessorKey: "tempo_peca",
     header: "Tempo Peça",
@@ -112,6 +103,14 @@ const columns: TableColumn<(typeof produtos.value)[0]>[] = [
     header: "Quantidade Costureiros",
     cell: ({ row }) => `${row.getValue("qtd_costureiros")}`,
   },
+  {
+    accessorKey: "invativo",
+    header: "Ativo",
+    cell: ({ row }) =>
+      row.getValue("inativo")
+        ? h(UBadge, { variant: "subtle", color: "error" }, "Invativo")
+        : h(UBadge, { variant: "subtle", color: "success" }, "Ativo"),
+  },
 ];
 
 const tableApi = useVueTable({
@@ -121,8 +120,8 @@ const tableApi = useVueTable({
 });
 </script>
 <template>
-  <div class="flex-1 w-full container mx-auto">
-    <h1 class="text-xl mt-4 mb-4">
+  <div class="flex-1 w-full container mx-auto py-4">
+    <h1 class="text-xl mb-4">
       Controle diário de produção -
       {{ formatedDate }}
     </h1>
@@ -235,7 +234,8 @@ const tableApi = useVueTable({
       <tfoot>
         <tr>
           <td :colspan="tableApi.getAllColumns().length" class="w-full">
-            <NuxtLinkLocale :to="'controle-de-producao-linha-producao-novo'"
+            <NuxtLinkLocale
+              :to="'controle-de-producao-linha-producao-novo'"
               class="px-4 w-full flex flex-row items-center py-3 gap-2 group cursor-pointer"
             >
               <div
