@@ -1,18 +1,17 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Npgsql;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using NodaTime;
+using Npgsql;
 
 namespace GambitoServer.Db;
 
-using GUser = User;
 using GRole = IdentityRole<Guid>;
-using GUserClaim = IdentityUserClaim<Guid>;
-using GUserRole = IdentityUserRole<Guid>;
-using GUserLogin = IdentityUserLogin<Guid>;
 using GRoleClaim = IdentityRoleClaim<Guid>;
+using GUser = User;
+using GUserClaim = IdentityUserClaim<Guid>;
+using GUserLogin = IdentityUserLogin<Guid>;
+using GUserRole = IdentityUserRole<Guid>;
 using GUserToken = IdentityUserToken<Guid>;
-
 
 public interface IHasOrg
 {
@@ -21,7 +20,6 @@ public interface IHasOrg
 
 public class GambitoContext : DbContext
 {
-
   private readonly IdentityService _identity;
 
   public GambitoContext(IdentityService identity)
@@ -30,7 +28,7 @@ public class GambitoContext : DbContext
   }
 
   public GambitoContext(DbContextOptions<GambitoContext> options, IdentityService identity)
-      : base(options)
+    : base(options)
   {
     _identity = identity;
   }
@@ -70,7 +68,8 @@ public class GambitoContext : DbContext
     optionsBuilder
       .UseNpgsql(
         $"Host=localhost:15432;Username=postgres;Password=postgres;Database=gambito",
-        o => o.MapEnum<TipoHora>("tipo_hora").UseNodaTime())
+        o => o.MapEnum<TipoHora>("tipo_hora").UseNodaTime()
+      )
       .UseSnakeCaseNamingConvention();
   }
 
@@ -136,7 +135,12 @@ public class GambitoContext : DbContext
     builder.Entity<GUserToken>(b =>
     {
       // Composite primary key consisting of the UserId, LoginProvider and Name
-      b.HasKey(t => new { t.UserId, t.LoginProvider, t.Name });
+      b.HasKey(t => new
+      {
+        t.UserId,
+        t.LoginProvider,
+        t.Name,
+      });
 
       // Limit the size of the composite key columns due to common DB restrictions
       b.Property(t => t.LoginProvider).HasMaxLength(256);
@@ -200,16 +204,14 @@ public class GambitoContext : DbContext
 
       entity.HasIndex(e => e.Nome, "defeito_nome_key").IsUnique();
 
-      entity.Property(e => e.Id)
-              .UseIdentityAlwaysColumn()
-              .HasColumnName("id");
-      entity.Property(e => e.Nome)
-              .HasMaxLength(50)
-              .HasColumnName("nome");
+      entity.Property(e => e.Id).UseIdentityAlwaysColumn().HasColumnName("id");
+      entity.Property(e => e.Nome).HasMaxLength(50).HasColumnName("nome");
       entity.Property(e => e.Organizacao).HasColumnName("organizacao");
 
-      entity.HasOne(d => d.OrganizacaoNavigation).WithMany(p => p.Defeitos)
-              .HasForeignKey(d => d.Organizacao);
+      entity
+        .HasOne(d => d.OrganizacaoNavigation)
+        .WithMany(p => p.Defeitos)
+        .HasForeignKey(d => d.Organizacao);
 
       entity.HasQueryFilter((l) => l.Organizacao == _identity.GetOrg());
     });
@@ -222,18 +224,18 @@ public class GambitoContext : DbContext
 
       entity.HasIndex(e => new { e.Organizacao, e.Nome }).IsUnique();
 
-      entity.Property(e => e.Id)
-              .UseIdentityAlwaysColumn()
-              .HasColumnName("id");
-      entity.Property(e => e.Nome)
-              .HasMaxLength(100)
-              .HasColumnName("nome");
+      entity.Property(e => e.Id).UseIdentityAlwaysColumn().HasColumnName("id");
+      entity.Property(e => e.Nome).HasMaxLength(100).HasColumnName("nome");
       entity.Property(e => e.Organizacao).HasColumnName("organizacao");
 
-      entity.HasOne(d => d.OrganizacaoNavigation).WithMany(p => p.Etapas)
-              .HasForeignKey(d => d.Organizacao);
+      entity
+        .HasOne(d => d.OrganizacaoNavigation)
+        .WithMany(p => p.Etapas)
+        .HasForeignKey(d => d.Organizacao);
 
-      entity.HasQueryFilter((l) => _identity.GetOrg() == null || l.Organizacao == _identity.GetOrg());
+      entity.HasQueryFilter(
+        (l) => _identity.GetOrg() == null || l.Organizacao == _identity.GetOrg()
+      );
     });
 
     modelBuilder.Entity<Funcao>(entity =>
@@ -244,18 +246,18 @@ public class GambitoContext : DbContext
 
       entity.HasIndex(e => new { e.Organizacao, e.Nome }).IsUnique();
 
-      entity.Property(e => e.Id)
-              .UseIdentityAlwaysColumn()
-              .HasColumnName("id");
-      entity.Property(e => e.Nome)
-              .HasMaxLength(100)
-              .HasColumnName("nome");
+      entity.Property(e => e.Id).UseIdentityAlwaysColumn().HasColumnName("id");
+      entity.Property(e => e.Nome).HasMaxLength(100).HasColumnName("nome");
       entity.Property(e => e.Organizacao).HasColumnName("organizacao");
 
-      entity.HasOne(d => d.OrganizacaoNavigation).WithMany(p => p.Funcaos)
-              .HasForeignKey(d => d.Organizacao);
+      entity
+        .HasOne(d => d.OrganizacaoNavigation)
+        .WithMany(p => p.Funcaos)
+        .HasForeignKey(d => d.Organizacao);
 
-      entity.HasQueryFilter((l) => _identity.GetOrg() == null || l.Organizacao == _identity.GetOrg());
+      entity.HasQueryFilter(
+        (l) => _identity.GetOrg() == null || l.Organizacao == _identity.GetOrg()
+      );
     });
 
     modelBuilder.Entity<Funcionario>(entity =>
@@ -264,29 +266,31 @@ public class GambitoContext : DbContext
 
       entity.ToTable("funcionario");
 
-      entity.Property(e => e.Id)
-              .UseIdentityAlwaysColumn()
-              .HasColumnName("id");
+      entity.Property(e => e.Id).UseIdentityAlwaysColumn().HasColumnName("id");
       entity.Property(e => e.Encarregado).HasColumnName("encarregado");
       entity.Property(e => e.Funcao).HasColumnName("funcao");
-      entity.Property(e => e.Invativo)
-              .HasDefaultValue(false)
-              .HasColumnName("invativo");
-      entity.Property(e => e.Nome)
-              .HasMaxLength(100)
-              .HasColumnName("nome");
+      entity.Property(e => e.Invativo).HasDefaultValue(false).HasColumnName("invativo");
+      entity.Property(e => e.Nome).HasMaxLength(100).HasColumnName("nome");
       entity.Property(e => e.Organizacao).HasColumnName("organizacao");
 
-      entity.HasOne(d => d.EncarregadoNavigation).WithMany(p => p.InverseEncarregadoNavigation)
-              .HasForeignKey(d => d.Encarregado);
+      entity
+        .HasOne(d => d.EncarregadoNavigation)
+        .WithMany(p => p.InverseEncarregadoNavigation)
+        .HasForeignKey(d => d.Encarregado);
 
-      entity.HasOne(d => d.FuncaoNavigation).WithMany(p => p.Funcionarios)
-              .HasForeignKey(d => d.Funcao);
+      entity
+        .HasOne(d => d.FuncaoNavigation)
+        .WithMany(p => p.Funcionarios)
+        .HasForeignKey(d => d.Funcao);
 
-      entity.HasOne(d => d.OrganizacaoNavigation).WithMany(p => p.Funcionarios)
-              .HasForeignKey(d => d.Organizacao);
+      entity
+        .HasOne(d => d.OrganizacaoNavigation)
+        .WithMany(p => p.Funcionarios)
+        .HasForeignKey(d => d.Organizacao);
 
-      entity.HasQueryFilter((l) => _identity.GetOrg() == null || l.Organizacao == _identity.GetOrg());
+      entity.HasQueryFilter(
+        (l) => _identity.GetOrg() == null || l.Organizacao == _identity.GetOrg()
+      );
     });
 
     modelBuilder.Entity<LinhaProducao>(entity =>
@@ -295,39 +299,47 @@ public class GambitoContext : DbContext
 
       entity.ToTable("linha_producao");
 
-      entity.Property(e => e.Id)
-              .UseIdentityAlwaysColumn()
-              .HasColumnName("id");
+      entity.Property(e => e.Id).UseIdentityAlwaysColumn().HasColumnName("id");
       entity.Property(e => e.Descricao).HasColumnName("descricao");
       entity.Property(e => e.Organizacao).HasColumnName("organizacao");
 
-      entity.HasOne(d => d.OrganizacaoNavigation).WithMany(p => p.LinhaProducaos)
-              .HasForeignKey(d => d.Organizacao);
+      entity
+        .HasOne(d => d.OrganizacaoNavigation)
+        .WithMany(p => p.LinhaProducaos)
+        .HasForeignKey(d => d.Organizacao);
 
-      entity.HasQueryFilter((l) => _identity.GetOrg() == null || l.Organizacao == _identity.GetOrg());
+      entity.HasQueryFilter(
+        (l) => _identity.GetOrg() == null || l.Organizacao == _identity.GetOrg()
+      );
     });
 
     modelBuilder.Entity<LinhaProducaoDia>(entity =>
     {
       entity.HasKey(e => e.Id);
 
-      entity.HasIndex(e => new {e.LinhaProducao, e.Data}).IsUnique();
+      entity.HasIndex(e => new { e.LinhaProducao, e.Data }).IsUnique();
 
       entity.ToTable("linha_producao_dia");
 
-      entity.Property(e => e.LinhaProducao).UseIdentityAlwaysColumn().HasColumnName("linha_producao");
+      entity
+        .Property(e => e.LinhaProducao)
+        .UseIdentityAlwaysColumn()
+        .HasColumnName("linha_producao");
 
       entity.Property(e => e.LinhaProducao).HasColumnName("linha_producao");
       entity.Property(e => e.Data).HasColumnName("data");
-      entity.Property(e => e.Invativo)
-              .HasDefaultValue(false)
-              .HasColumnName("invativo");
+      entity.Property(e => e.Invativo).HasDefaultValue(false).HasColumnName("invativo");
 
-      entity.HasOne(d => d.LinhaProducaoNavigation).WithMany(p => p.LinhaProducaoDia)
-              .HasForeignKey(d => d.LinhaProducao)
-              .OnDelete(DeleteBehavior.ClientSetNull);
+      entity
+        .HasOne(d => d.LinhaProducaoNavigation)
+        .WithMany(p => p.LinhaProducaoDia)
+        .HasForeignKey(d => d.LinhaProducao)
+        .OnDelete(DeleteBehavior.ClientSetNull);
 
-      entity.HasQueryFilter((l) => _identity.GetOrg() == null || l.LinhaProducaoNavigation.Organizacao == _identity.GetOrg());
+      entity.HasQueryFilter(
+        (l) =>
+          _identity.GetOrg() == null || l.LinhaProducaoNavigation.Organizacao == _identity.GetOrg()
+      );
     });
 
     modelBuilder.Entity<LinhaProducaoHora>(entity =>
@@ -336,36 +348,41 @@ public class GambitoContext : DbContext
 
       entity.ToTable("linha_producao_hora");
 
-      entity.Property(e => e.Id)
-              .UseIdentityAlwaysColumn()
-              .HasColumnName("id");
-      entity.Property(e => e.Hora)
-              .HasColumnType("time without time zone")
-              .HasColumnName("hora");
-      entity.Property(e => e.HoraFim)
-              .HasColumnType("time without time zone")
-              .HasColumnName("hora_fim");
-      entity.Property(e => e.HoraIni)
-              .HasColumnType("time without time zone")
-              .HasColumnName("hora_ini");
+      entity.Property(e => e.Id).UseIdentityAlwaysColumn().HasColumnName("id");
+      entity.Property(e => e.Hora).HasColumnType("time without time zone").HasColumnName("hora");
+      entity
+        .Property(e => e.HoraFim)
+        .HasColumnType("time without time zone")
+        .HasColumnName("hora_fim");
+      entity
+        .Property(e => e.HoraIni)
+        .HasColumnType("time without time zone")
+        .HasColumnName("hora_ini");
       entity.Property(e => e.LinhaProducaoDia).HasColumnName("linha_producao_dia");
-      entity.Property(e => e.Paralizacao)
-              .HasDefaultValue(false)
-              .HasColumnName("paralizacao");
+      entity.Property(e => e.Paralizacao).HasDefaultValue(false).HasColumnName("paralizacao");
       entity.Property(e => e.ProdutoConfig).HasColumnName("produto_config");
       entity.Property(e => e.QtdProduzido).HasColumnName("qtd_produzido");
 
-      entity.HasOne(d => d.ProdutoConfigNavigation).WithMany(p => p.LinhaProducaoHoras)
-              .HasForeignKey(d => d.ProdutoConfig)
-              .OnDelete(DeleteBehavior.NoAction);
+      entity
+        .HasOne(d => d.ProdutoConfigNavigation)
+        .WithMany(p => p.LinhaProducaoHoras)
+        .HasForeignKey(d => d.ProdutoConfig)
+        .OnDelete(DeleteBehavior.NoAction);
 
-      entity.HasOne(d => d.LinhaProducaoDiaNavigation).WithMany(p => p.LinhaProducaoHoras)
-              .HasForeignKey(d => d.LinhaProducaoDia);
+      entity
+        .HasOne(d => d.LinhaProducaoDiaNavigation)
+        .WithMany(p => p.LinhaProducaoHoras)
+        .HasForeignKey(d => d.LinhaProducaoDia);
     });
 
     modelBuilder.Entity<LinhaProducaoHoraDefeito>(entity =>
     {
-      entity.HasKey(e => new { e.LinhaProducaoHora, e.Retrabalhado, e.Defeito });
+      entity.HasKey(e => new
+      {
+        e.LinhaProducaoHora,
+        e.Retrabalhado,
+        e.Defeito,
+      });
 
       entity.ToTable("linha_producao_hora_defeito");
 
@@ -374,13 +391,17 @@ public class GambitoContext : DbContext
       entity.Property(e => e.Defeito).HasColumnName("defeito");
       entity.Property(e => e.QtdPecas).HasColumnName("qtd_pecas");
 
-      entity.HasOne(d => d.DefeitoNavigation).WithMany(p => p.LinhaProducaoHoraDefeitos)
-              .HasForeignKey(d => d.Defeito)
-              .OnDelete(DeleteBehavior.ClientSetNull);
+      entity
+        .HasOne(d => d.DefeitoNavigation)
+        .WithMany(p => p.LinhaProducaoHoraDefeitos)
+        .HasForeignKey(d => d.Defeito)
+        .OnDelete(DeleteBehavior.ClientSetNull);
 
-      entity.HasOne(d => d.LinhaProducaoHoraNavigation).WithMany(p => p.LinhaProducaoHoraDefeitos)
-              .HasForeignKey(d => d.LinhaProducaoHora)
-              .OnDelete(DeleteBehavior.ClientSetNull);
+      entity
+        .HasOne(d => d.LinhaProducaoHoraNavigation)
+        .WithMany(p => p.LinhaProducaoHoraDefeitos)
+        .HasForeignKey(d => d.LinhaProducaoHora)
+        .OnDelete(DeleteBehavior.ClientSetNull);
     });
 
     modelBuilder.Entity<ProdutoConfigEtapa>(entity =>
@@ -394,12 +415,16 @@ public class GambitoContext : DbContext
       entity.Property(e => e.Ordem).HasColumnName("ordem");
       entity.Property(e => e.Segundos).HasColumnName("segundos");
 
-      entity.HasOne(d => d.EtapaNavigation).WithMany(p => p.ProdutoConfigEtapas)
-              .HasForeignKey(d => d.Etapa);
+      entity
+        .HasOne(d => d.EtapaNavigation)
+        .WithMany(p => p.ProdutoConfigEtapas)
+        .HasForeignKey(d => d.Etapa);
 
-      entity.HasOne(d => d.ProdutoConfigNavigation).WithMany(p => p.ProdutoConfigEtapas)
-              .HasForeignKey(d => d.ProdutoConfig)
-              .OnDelete(DeleteBehavior.ClientCascade);
+      entity
+        .HasOne(d => d.ProdutoConfigNavigation)
+        .WithMany(p => p.ProdutoConfigEtapas)
+        .HasForeignKey(d => d.ProdutoConfig)
+        .OnDelete(DeleteBehavior.ClientCascade);
     });
 
     modelBuilder.Entity<LinhaProducaoHoraEtapa>(entity =>
@@ -411,57 +436,66 @@ public class GambitoContext : DbContext
       entity.Property(e => e.Etapa).HasColumnName("etapa");
       entity.Property(e => e.LinhaProducaoHora).HasColumnName("linha_producao_hora");
 
-      entity.HasOne(d => d.EtapaNavigation).WithMany(p => p.LinhaProducaoHoraEtapas)
-              .HasForeignKey(d => d.Etapa);
+      entity
+        .HasOne(d => d.EtapaNavigation)
+        .WithMany(p => p.LinhaProducaoHoraEtapas)
+        .HasForeignKey(d => d.Etapa);
 
-      entity.HasOne(d => d.LinhaProducaoHoraNavigation).WithMany(p => p.LinhaProducaoHoraEtapas)
-              .HasForeignKey(d => d.LinhaProducaoHora)
-              .OnDelete(DeleteBehavior.ClientSetNull);
+      entity
+        .HasOne(d => d.LinhaProducaoHoraNavigation)
+        .WithMany(p => p.LinhaProducaoHoraEtapas)
+        .HasForeignKey(d => d.LinhaProducaoHora)
+        .OnDelete(DeleteBehavior.ClientSetNull);
 
-      entity.HasMany(d => d.Funcionarios).WithMany(p => p.LinhaProducaoHoraEtapas)
-              .UsingEntity<Dictionary<string, object>>(
-                  "LinhaProducaoHoraEtapaFuncionario",
-                  r => r.HasOne<Funcionario>().WithMany()
-                      .HasForeignKey("Funcionario")
-                      .OnDelete(DeleteBehavior.ClientCascade),
-                  l => l.HasOne<LinhaProducaoHoraEtapa>().WithMany()
-                      .HasForeignKey("LinhaProducaoHora", "Etapa")
-                      .OnDelete(DeleteBehavior.ClientCascade),
-                  j =>
-                  {
-                    j.HasKey("LinhaProducaoHora", "Etapa", "Funcionario");
-                    j.ToTable("linha_producao_hora_etapa_funcionario");
-                    j.IndexerProperty<int>("LinhaProducaoHora").HasColumnName("linha_producao_hora");
-                    j.IndexerProperty<int>("Etapa").HasColumnName("etapa");
-                    j.IndexerProperty<int>("Funcionario").HasColumnName("funcionario");
-                  });
+      entity
+        .HasMany(d => d.Funcionarios)
+        .WithMany(p => p.LinhaProducaoHoraEtapas)
+        .UsingEntity<Dictionary<string, object>>(
+          "LinhaProducaoHoraEtapaFuncionario",
+          r =>
+            r.HasOne<Funcionario>()
+              .WithMany()
+              .HasForeignKey("Funcionario")
+              .OnDelete(DeleteBehavior.ClientCascade),
+          l =>
+            l.HasOne<LinhaProducaoHoraEtapa>()
+              .WithMany()
+              .HasForeignKey("LinhaProducaoHora", "Etapa")
+              .OnDelete(DeleteBehavior.ClientCascade),
+          j =>
+          {
+            j.HasKey("LinhaProducaoHora", "Etapa", "Funcionario");
+            j.ToTable("linha_producao_hora_etapa_funcionario");
+            j.IndexerProperty<int>("LinhaProducaoHora").HasColumnName("linha_producao_hora");
+            j.IndexerProperty<int>("Etapa").HasColumnName("etapa");
+            j.IndexerProperty<int>("Funcionario").HasColumnName("funcionario");
+          }
+        );
     });
 
     modelBuilder.Entity<Organizacao>(entity =>
     {
       entity.ToTable("organizacao");
 
-      entity.Property(e => e.Id)
-              .UseIdentityAlwaysColumn()
-              .HasColumnName("id");
-      entity.Property(e => e.Nome)
-              .HasMaxLength(100)
-              .HasColumnName("nome");
+      entity.Property(e => e.Id).UseIdentityAlwaysColumn().HasColumnName("id");
+      entity.Property(e => e.Nome).HasMaxLength(100).HasColumnName("nome");
     });
 
     modelBuilder.Entity<ProdutoConfig>(entity =>
     {
       entity.ToTable("produto_config");
 
-      entity.Property(e => e.Id)
-              .UseIdentityAlwaysColumn()
-              .HasColumnName("id");
+      entity.Property(e => e.Id).UseIdentityAlwaysColumn().HasColumnName("id");
       entity.Property(e => e.Produto).HasColumnName("produto");
       // entity.Property(e => e.QtdPecas).HasColumnName("qtd_pecas");
 
-      entity.HasOne(d => d.ProdutoNavigation).WithMany(p => p.Pedidos)
-              .HasForeignKey(d => d.Produto)
-              .OnDelete(DeleteBehavior.ClientSetNull);
+      entity
+        .HasOne(d => d.ProdutoNavigation)
+        .WithMany(p => p.Pedidos)
+        .HasForeignKey(d => d.Produto)
+        .OnDelete(DeleteBehavior.ClientSetNull);
+
+      entity.HasMany(d => d.LinhaProducaoDias).WithMany().UsingEntity<LinhaProducaoHora>();
     });
 
     modelBuilder.Entity<Produto>(entity =>
@@ -472,43 +506,44 @@ public class GambitoContext : DbContext
 
       entity.HasIndex(e => e.Nome).IsUnique();
 
-      entity.Property(e => e.Id)
-              .UseIdentityAlwaysColumn()
-              .HasColumnName("id");
-      entity.Property(e => e.Nome)
-              .HasMaxLength(100)
-              .HasColumnName("nome");
+      entity.Property(e => e.Id).UseIdentityAlwaysColumn().HasColumnName("id");
+      entity.Property(e => e.Nome).HasMaxLength(100).HasColumnName("nome");
       entity.Property(e => e.Organizacao).HasColumnName("organizacao");
       entity.Property(e => e.TempoPeca).HasColumnName("tempo_peca");
 
-      entity.HasOne(d => d.OrganizacaoNavigation).WithMany(p => p.Produtos)
-              .HasForeignKey(d => d.Organizacao);
+      entity
+        .HasOne(d => d.OrganizacaoNavigation)
+        .WithMany(p => p.Produtos)
+        .HasForeignKey(d => d.Organizacao);
     });
 
     modelBuilder.Entity<GUser>(entity =>
     {
-      entity.HasMany(d => d.Organizacaos).WithMany(p => p.Usuarios)
-              .UsingEntity<Dictionary<string, object>>(
-                  "UserOrganizacao",
-                  r => r.HasOne<Organizacao>().WithMany()
-                      .HasForeignKey("Organizacao")
-                      .OnDelete(DeleteBehavior.ClientSetNull),
-                  l => l.HasOne<GUser>().WithMany()
-                      .HasForeignKey("Usuario"),
-                  j =>
-                  {
-                    j.HasKey("Usuario", "Organizacao");
-                    j.ToTable("user_organizacao");
-                    j.IndexerProperty<Guid>("Usuario").HasColumnName("usuario");
-                    j.IndexerProperty<int>("Organizacao").HasColumnName("organizacao");
-                  });
+      entity
+        .HasMany(d => d.Organizacaos)
+        .WithMany(p => p.Usuarios)
+        .UsingEntity<Dictionary<string, object>>(
+          "UserOrganizacao",
+          r =>
+            r.HasOne<Organizacao>()
+              .WithMany()
+              .HasForeignKey("Organizacao")
+              .OnDelete(DeleteBehavior.ClientSetNull),
+          l => l.HasOne<GUser>().WithMany().HasForeignKey("Usuario"),
+          j =>
+          {
+            j.HasKey("Usuario", "Organizacao");
+            j.ToTable("user_organizacao");
+            j.IndexerProperty<Guid>("Usuario").HasColumnName("usuario");
+            j.IndexerProperty<int>("Organizacao").HasColumnName("organizacao");
+          }
+        );
     });
 
     Seed(modelBuilder);
 
     base.OnModelCreating(modelBuilder);
   }
-
 
   // public override int SaveChanges()
   // {
@@ -571,18 +606,33 @@ public class GambitoContext : DbContext
     var linhaProdHora2Id = 2;
     var linhaProdHora3Id = 3;
 
-
     // --- Organizacao ---
-    modelBuilder.Entity<Organizacao>().HasData(
+    modelBuilder
+      .Entity<Organizacao>()
+      .HasData(
         new Organizacao { Id = org1Id, Nome = "Org de desenvolvimento" },
         new Organizacao { Id = org2Id, Nome = "Org de testes" }
-    );
+      );
 
     // --- Identity: GRole ---
-    modelBuilder.Entity<GRole>().HasData(
-        new GRole { Id = adminRoleId, Name = "Admin", NormalizedName = "ADMIN", ConcurrencyStamp = null },
-        new GRole { Id = operatorRoleId, Name = "Operator", NormalizedName = "OPERATOR", ConcurrencyStamp = null }
-    );
+    modelBuilder
+      .Entity<GRole>()
+      .HasData(
+        new GRole
+        {
+          Id = adminRoleId,
+          Name = "Admin",
+          NormalizedName = "ADMIN",
+          ConcurrencyStamp = null,
+        },
+        new GRole
+        {
+          Id = operatorRoleId,
+          Name = "Operator",
+          NormalizedName = "OPERATOR",
+          ConcurrencyStamp = null,
+        }
+      );
 
     // --- Identity: GUser ---
     // For PasswordHash, use a proper hasher in a real scenario:
@@ -596,7 +646,8 @@ public class GambitoContext : DbContext
       Email = "admin@fabrica.com",
       NormalizedEmail = "ADMIN@FABRICA.COM",
       EmailConfirmed = true,
-      PasswordHash = "AQAAAAIAAYagAAAAEFUG/PMFzzxt549qLdgva0XLTbAIfMYCFXLSDDvZ/BIygz06h3ngihtvKAa/ryEvWg==",
+      PasswordHash =
+        "AQAAAAIAAYagAAAAEFUG/PMFzzxt549qLdgva0XLTbAIfMYCFXLSDDvZ/BIygz06h3ngihtvKAa/ryEvWg==",
       SecurityStamp = null,
       ConcurrencyStamp = null,
       LockoutEnabled = false,
@@ -611,7 +662,8 @@ public class GambitoContext : DbContext
       Email = "operator@fabrica.com",
       NormalizedEmail = "OPERATOR@FABRICA.COM",
       EmailConfirmed = true,
-      PasswordHash = "AQAAAAIAAYagAAAAEIv3lOaj9hoHyu14WS9meY5CZoFq+ZKnMgJKM9zV/28dXFOLgo+EP+ZSuQym1FRBLg==",
+      PasswordHash =
+        "AQAAAAIAAYagAAAAEIv3lOaj9hoHyu14WS9meY5CZoFq+ZKnMgJKM9zV/28dXFOLgo+EP+ZSuQym1FRBLg==",
       SecurityStamp = null,
       ConcurrencyStamp = null,
       LockoutEnabled = false,
@@ -624,90 +676,270 @@ public class GambitoContext : DbContext
     // Console.WriteLine(admin_user.PasswordHash);
     // Console.WriteLine(op_user.PasswordHash);
 
-    modelBuilder.Entity<GUser>().HasData(
-      admin_user,
-      op_user
-    );
+    modelBuilder.Entity<GUser>().HasData(admin_user, op_user);
 
     // --- Identity: GUserRole ---
-    modelBuilder.Entity<GUserRole>().HasData(
+    modelBuilder
+      .Entity<GUserRole>()
+      .HasData(
         new GUserRole { UserId = adminUserId, RoleId = adminRoleId },
         new GUserRole { UserId = operatorUserId, RoleId = operatorRoleId }
-    );
+      );
 
     // --- Join Table: UserOrganizacao ---
     // This assumes GUser.Organizacaos and Organizacao.Usuarios setup the M-M
     // The table name is "user_organizacao"
-    modelBuilder.Entity("UserOrganizacao").HasData(
+    modelBuilder
+      .Entity("UserOrganizacao")
+      .HasData(
         new { Usuario = adminUserId, Organizacao = org1Id },
         new { Usuario = adminUserId, Organizacao = org2Id }, // Admin has access to both
         new { Usuario = operatorUserId, Organizacao = org1Id }
-    );
+      );
 
     // --- Defeito ---
-    modelBuilder.Entity<Defeito>().HasData(
-        new Defeito { Id = defeitoRiscoId, Nome = "Risco Profundo", Organizacao = org1Id },
-        new Defeito { Id = defeitoAmassadoId, Nome = "Amassado Leve", Organizacao = org1Id },
-        new Defeito { Id = defeitoPinturaId, Nome = "Falha na Pintura", Organizacao = org1Id },
-        new Defeito { Id = 4, Nome = "Risco Superficial", Organizacao = org2Id }
-    );
+    modelBuilder
+      .Entity<Defeito>()
+      .HasData(
+        new Defeito
+        {
+          Id = defeitoRiscoId,
+          Nome = "Risco Profundo",
+          Organizacao = org1Id,
+        },
+        new Defeito
+        {
+          Id = defeitoAmassadoId,
+          Nome = "Amassado Leve",
+          Organizacao = org1Id,
+        },
+        new Defeito
+        {
+          Id = defeitoPinturaId,
+          Nome = "Falha na Pintura",
+          Organizacao = org1Id,
+        },
+        new Defeito
+        {
+          Id = 4,
+          Nome = "Risco Superficial",
+          Organizacao = org2Id,
+        }
+      );
 
     // --- Etapa ---
-    modelBuilder.Entity<Etapa>().HasData(
-        new Etapa { Id = etapaCorteId, Nome = "Corte", Organizacao = org1Id },
-        new Etapa { Id = etapaMontagemId, Nome = "Montagem", Organizacao = org1Id },
-        new Etapa { Id = etapaQualidadeId, Nome = "Controle de Qualidade", Organizacao = org1Id },
-        new Etapa { Id = 5, Nome = "Embalagem", Organizacao = org2Id }
-    );
+    modelBuilder
+      .Entity<Etapa>()
+      .HasData(
+        new Etapa
+        {
+          Id = etapaCorteId,
+          Nome = "Corte",
+          Organizacao = org1Id,
+        },
+        new Etapa
+        {
+          Id = etapaMontagemId,
+          Nome = "Montagem",
+          Organizacao = org1Id,
+        },
+        new Etapa
+        {
+          Id = etapaQualidadeId,
+          Nome = "Controle de Qualidade",
+          Organizacao = org1Id,
+        },
+        new Etapa
+        {
+          Id = 5,
+          Nome = "Embalagem",
+          Organizacao = org2Id,
+        }
+      );
 
     // --- Funcao ---
-    modelBuilder.Entity<Funcao>().HasData(
-        new Funcao { Id = supervisorFuncId, Nome = "Supervisor de Produção", Organizacao = org1Id },
-        new Funcao { Id = operatorFuncId, Nome = "Operador de Máquina", Organizacao = org1Id },
-        new Funcao { Id = managerFuncId, Nome = "Gerente de Qualidade", Organizacao = org1Id },
-        new Funcao { Id = 4, Nome = "Auxiliar de Produção", Organizacao = org2Id }
-    );
+    modelBuilder
+      .Entity<Funcao>()
+      .HasData(
+        new Funcao
+        {
+          Id = supervisorFuncId,
+          Nome = "Supervisor de Produção",
+          Organizacao = org1Id,
+        },
+        new Funcao
+        {
+          Id = operatorFuncId,
+          Nome = "Operador de Máquina",
+          Organizacao = org1Id,
+        },
+        new Funcao
+        {
+          Id = managerFuncId,
+          Nome = "Gerente de Qualidade",
+          Organizacao = org1Id,
+        },
+        new Funcao
+        {
+          Id = 4,
+          Nome = "Auxiliar de Produção",
+          Organizacao = org2Id,
+        }
+      );
 
     // --- Produto ---
-    modelBuilder.Entity<Produto>().HasData(
-        new Produto { Id = productAId, Nome = "Produto Alfa", Organizacao = org1Id, TempoPeca = 120 }, // 120 segundos
-        new Produto { Id = productBId, Nome = "Produto Beta", Organizacao = org1Id, TempoPeca = 180 },
-        new Produto { Id = 3, Nome = "Produto Gama", Organizacao = org2Id, TempoPeca = 90 }
-    );
+    modelBuilder
+      .Entity<Produto>()
+      .HasData(
+        new Produto
+        {
+          Id = productAId,
+          Nome = "Produto Alfa",
+          Organizacao = org1Id,
+          TempoPeca = 120,
+        }, // 120 segundos
+        new Produto
+        {
+          Id = productBId,
+          Nome = "Produto Beta",
+          Organizacao = org1Id,
+          TempoPeca = 180,
+        },
+        new Produto
+        {
+          Id = 3,
+          Nome = "Produto Gama",
+          Organizacao = org2Id,
+          TempoPeca = 90,
+        }
+      );
 
     // --- Funcionario ---
-    modelBuilder.Entity<Funcionario>().HasData(
-        new Funcionario { Id = funcSupervisorId, Nome = "Carlos Silva", Funcao = supervisorFuncId, Organizacao = org1Id, Invativo = false, Encarregado = null },
-        new Funcionario { Id = funcOperator1Id, Nome = "Ana Pereira", Funcao = operatorFuncId, Organizacao = org1Id, Invativo = false, Encarregado = funcSupervisorId },
-        new Funcionario { Id = funcOperator2Id, Nome = "João Costa", Funcao = operatorFuncId, Organizacao = org1Id, Invativo = true, Encarregado = funcSupervisorId }, // Inativo
-        new Funcionario { Id = 4, Nome = "Mariana Lima", Funcao = managerFuncId, Organizacao = org1Id, Invativo = false, Encarregado = null },
-        new Funcionario { Id = 5, Nome = "Pedro Alves", Funcao = 4, Organizacao = org2Id, Invativo = false, Encarregado = null }
-    );
+    modelBuilder
+      .Entity<Funcionario>()
+      .HasData(
+        new Funcionario
+        {
+          Id = funcSupervisorId,
+          Nome = "Carlos Silva",
+          Funcao = supervisorFuncId,
+          Organizacao = org1Id,
+          Invativo = false,
+          Encarregado = null,
+        },
+        new Funcionario
+        {
+          Id = funcOperator1Id,
+          Nome = "Ana Pereira",
+          Funcao = operatorFuncId,
+          Organizacao = org1Id,
+          Invativo = false,
+          Encarregado = funcSupervisorId,
+        },
+        new Funcionario
+        {
+          Id = funcOperator2Id,
+          Nome = "João Costa",
+          Funcao = operatorFuncId,
+          Organizacao = org1Id,
+          Invativo = true,
+          Encarregado = funcSupervisorId,
+        }, // Inativo
+        new Funcionario
+        {
+          Id = 4,
+          Nome = "Mariana Lima",
+          Funcao = managerFuncId,
+          Organizacao = org1Id,
+          Invativo = false,
+          Encarregado = null,
+        },
+        new Funcionario
+        {
+          Id = 5,
+          Nome = "Pedro Alves",
+          Funcao = 4,
+          Organizacao = org2Id,
+          Invativo = false,
+          Encarregado = null,
+        }
+      );
 
     // --- LinhaProducao ---
-    modelBuilder.Entity<LinhaProducao>().HasData(
-        new LinhaProducao { Id = linhaProd1Id, Descricao = "Linha de Montagem A", Organizacao = org1Id },
-        new LinhaProducao { Id = linhaProd2Id, Descricao = "Linha de Pintura B", Organizacao = org1Id },
-        new LinhaProducao { Id = 3, Descricao = "Linha de Testes C", Organizacao = org2Id }
-    );
+    modelBuilder
+      .Entity<LinhaProducao>()
+      .HasData(
+        new LinhaProducao
+        {
+          Id = linhaProd1Id,
+          Descricao = "Linha de Montagem A",
+          Organizacao = org1Id,
+        },
+        new LinhaProducao
+        {
+          Id = linhaProd2Id,
+          Descricao = "Linha de Pintura B",
+          Organizacao = org1Id,
+        },
+        new LinhaProducao
+        {
+          Id = 3,
+          Descricao = "Linha de Testes C",
+          Organizacao = org2Id,
+        }
+      );
 
     // --- ProdutoConfig (Pedidos) ---
-    modelBuilder.Entity<ProdutoConfig>().HasData(
+    modelBuilder
+      .Entity<ProdutoConfig>()
+      .HasData(
         new ProdutoConfig { Id = prodConfigA1Id, Produto = productAId },
         new ProdutoConfig { Id = prodConfigB1Id, Produto = productBId },
         new ProdutoConfig { Id = 3, Produto = 3 } // Produto Gama da Org 2
-    );
+      );
 
     // --- ProdutoConfigEtapa ---
-    modelBuilder.Entity<ProdutoConfigEtapa>().HasData(
+    modelBuilder
+      .Entity<ProdutoConfigEtapa>()
+      .HasData(
         // Produto Alfa (prodConfigA1Id)
-        new ProdutoConfigEtapa { ProdutoConfig = prodConfigA1Id, Etapa = etapaMontagemId, Ordem = 2, Segundos = 60 },
-        new ProdutoConfigEtapa { ProdutoConfig = prodConfigA1Id, Etapa = etapaQualidadeId, Ordem = 3, Segundos = 30 },
+        new ProdutoConfigEtapa
+        {
+          ProdutoConfig = prodConfigA1Id,
+          Etapa = etapaMontagemId,
+          Ordem = 2,
+          Segundos = 60,
+        },
+        new ProdutoConfigEtapa
+        {
+          ProdutoConfig = prodConfigA1Id,
+          Etapa = etapaQualidadeId,
+          Ordem = 3,
+          Segundos = 30,
+        },
         // Produto Beta (prodConfigB1Id)
-        new ProdutoConfigEtapa { ProdutoConfig = prodConfigB1Id, Etapa = etapaCorteId, Ordem = 1, Segundos = 40 },
-        new ProdutoConfigEtapa { ProdutoConfig = prodConfigB1Id, Etapa = etapaMontagemId, Ordem = 2, Segundos = 70 },
-        new ProdutoConfigEtapa { ProdutoConfig = prodConfigB1Id, Etapa = etapaQualidadeId, Ordem = 4, Segundos = 30 }
-    );
+        new ProdutoConfigEtapa
+        {
+          ProdutoConfig = prodConfigB1Id,
+          Etapa = etapaCorteId,
+          Ordem = 1,
+          Segundos = 40,
+        },
+        new ProdutoConfigEtapa
+        {
+          ProdutoConfig = prodConfigB1Id,
+          Etapa = etapaMontagemId,
+          Ordem = 2,
+          Segundos = 70,
+        },
+        new ProdutoConfigEtapa
+        {
+          ProdutoConfig = prodConfigB1Id,
+          Etapa = etapaQualidadeId,
+          Ordem = 4,
+          Segundos = 30,
+        }
+      );
 
     // --- LinhaProducaoDia ---
     // PK is LinhaProducao (FK to LinhaProducao.Id)
@@ -715,15 +947,37 @@ public class GambitoContext : DbContext
     var today = new LocalDate(2025, 5, 25);
     var yesterday = today.PlusDays(-1);
 
-    modelBuilder.Entity<LinhaProducaoDia>().HasData(
-        new LinhaProducaoDia { Id = linhaProdDia1Id, LinhaProducao = linhaProd1Id, Data = yesterday, Invativo = false },
-        new LinhaProducaoDia { Id = 2, LinhaProducao = linhaProd1Id, Data = today, Invativo = false },
-        new LinhaProducaoDia { Id = linhaProdDia2Id, LinhaProducao = linhaProd2Id, Data = today, Invativo = false }
-    );
+    modelBuilder
+      .Entity<LinhaProducaoDia>()
+      .HasData(
+        new LinhaProducaoDia
+        {
+          Id = linhaProdDia1Id,
+          LinhaProducao = linhaProd1Id,
+          Data = yesterday,
+          Invativo = false,
+        },
+        new LinhaProducaoDia
+        {
+          Id = 2,
+          LinhaProducao = linhaProd1Id,
+          Data = today,
+          Invativo = false,
+        },
+        new LinhaProducaoDia
+        {
+          Id = linhaProdDia2Id,
+          LinhaProducao = linhaProd2Id,
+          Data = today,
+          Invativo = false,
+        }
+      );
 
     // --- LinhaProducaoHora ---
     // LinhaProducaoDia here is the PK of LinhaProducaoDia, which is LinhaProducao.Id
-    modelBuilder.Entity<LinhaProducaoHora>().HasData(
+    modelBuilder
+      .Entity<LinhaProducaoHora>()
+      .HasData(
         new LinhaProducaoHora
         {
           Id = linhaProdHora1Id,
@@ -731,7 +985,7 @@ public class GambitoContext : DbContext
           Hora = new LocalTime(8, 0, 0),
           ProdutoConfig = prodConfigA1Id, // Produto Alfa
           QtdProduzido = 10,
-          Paralizacao = false
+          Paralizacao = false,
         },
         new LinhaProducaoHora
         {
@@ -740,7 +994,7 @@ public class GambitoContext : DbContext
           Hora = new LocalTime(9, 0, 0), // Example of 'Hora' field
           ProdutoConfig = prodConfigA1Id, // Produto Alfa
           QtdProduzido = 12,
-          Paralizacao = false
+          Paralizacao = false,
         },
         new LinhaProducaoHora
         {
@@ -749,53 +1003,114 @@ public class GambitoContext : DbContext
           Hora = new LocalTime(10, 0, 0),
           ProdutoConfig = prodConfigA1Id,
           QtdProduzido = 0, // No production during full stop
-          Paralizacao = true
+          Paralizacao = true,
         },
-         new LinhaProducaoHora // For Linha Producao 2
-         {
-           Id = 4,
-           LinhaProducaoDia = linhaProdDia2Id, // Refers to LinhaProducao 2, today
-           Hora = new LocalTime(8, 0, 0),
-           ProdutoConfig = prodConfigB1Id, // Produto Beta
-           QtdProduzido = 8,
-           Paralizacao = false
-         }
-    );
+        new LinhaProducaoHora // For Linha Producao 2
+        {
+          Id = 4,
+          LinhaProducaoDia = linhaProdDia2Id, // Refers to LinhaProducao 2, today
+          Hora = new LocalTime(8, 0, 0),
+          ProdutoConfig = prodConfigB1Id, // Produto Beta
+          QtdProduzido = 8,
+          Paralizacao = false,
+        }
+      );
 
     // --- LinhaProducaoHoraDefeito ---
-    modelBuilder.Entity<LinhaProducaoHoraDefeito>().HasData(
-        new LinhaProducaoHoraDefeito { LinhaProducaoHora = linhaProdHora1Id, Retrabalhado = false, Defeito = defeitoRiscoId, QtdPecas = 2 },
-        new LinhaProducaoHoraDefeito { LinhaProducaoHora = linhaProdHora1Id, Retrabalhado = true, Defeito = defeitoAmassadoId, QtdPecas = 1 },
-        new LinhaProducaoHoraDefeito { LinhaProducaoHora = linhaProdHora2Id, Retrabalhado = false, Defeito = defeitoPinturaId, QtdPecas = 1 }
-    );
+    modelBuilder
+      .Entity<LinhaProducaoHoraDefeito>()
+      .HasData(
+        new LinhaProducaoHoraDefeito
+        {
+          LinhaProducaoHora = linhaProdHora1Id,
+          Retrabalhado = false,
+          Defeito = defeitoRiscoId,
+          QtdPecas = 2,
+        },
+        new LinhaProducaoHoraDefeito
+        {
+          LinhaProducaoHora = linhaProdHora1Id,
+          Retrabalhado = true,
+          Defeito = defeitoAmassadoId,
+          QtdPecas = 1,
+        },
+        new LinhaProducaoHoraDefeito
+        {
+          LinhaProducaoHora = linhaProdHora2Id,
+          Retrabalhado = false,
+          Defeito = defeitoPinturaId,
+          QtdPecas = 1,
+        }
+      );
 
     // --- LinhaProducaoHoraEtapa ---
-    modelBuilder.Entity<LinhaProducaoHoraEtapa>().HasData(
+    modelBuilder
+      .Entity<LinhaProducaoHoraEtapa>()
+      .HasData(
         // For LinhaProducaoHora1 (Produto Alfa)
         new LinhaProducaoHoraEtapa { LinhaProducaoHora = linhaProdHora1Id, Etapa = etapaCorteId },
-        new LinhaProducaoHoraEtapa { LinhaProducaoHora = linhaProdHora1Id, Etapa = etapaMontagemId },
+        new LinhaProducaoHoraEtapa
+        {
+          LinhaProducaoHora = linhaProdHora1Id,
+          Etapa = etapaMontagemId,
+        },
         // For LinhaProducaoHora2 (Produto Alfa)
-        new LinhaProducaoHoraEtapa { LinhaProducaoHora = linhaProdHora2Id, Etapa = etapaMontagemId },
-        new LinhaProducaoHoraEtapa { LinhaProducaoHora = linhaProdHora2Id, Etapa = etapaQualidadeId }
-    );
+        new LinhaProducaoHoraEtapa
+        {
+          LinhaProducaoHora = linhaProdHora2Id,
+          Etapa = etapaMontagemId,
+        },
+        new LinhaProducaoHoraEtapa
+        {
+          LinhaProducaoHora = linhaProdHora2Id,
+          Etapa = etapaQualidadeId,
+        }
+      );
 
     // --- Join Table: LinhaProducaoHoraEtapaFuncionario ---
     // Table name: "linha_producao_hora_etapa_funcionario"
     // Keys: "LinhaProducaoHora", "Etapa", "Funcionario"
-    modelBuilder.Entity("LinhaProducaoHoraEtapaFuncionario").HasData(
+    modelBuilder
+      .Entity("LinhaProducaoHoraEtapaFuncionario")
+      .HasData(
         // Hora 1, Etapa Corte, Funcionario Operator1
-        new { LinhaProducaoHora = linhaProdHora1Id, Etapa = etapaCorteId, Funcionario = funcOperator1Id },
+        new
+        {
+          LinhaProducaoHora = linhaProdHora1Id,
+          Etapa = etapaCorteId,
+          Funcionario = funcOperator1Id,
+        },
         // Hora 1, Etapa Montagem, Funcionario Operator2
-        new { LinhaProducaoHora = linhaProdHora1Id, Etapa = etapaMontagemId, Funcionario = funcOperator2Id },
+        new
+        {
+          LinhaProducaoHora = linhaProdHora1Id,
+          Etapa = etapaMontagemId,
+          Funcionario = funcOperator2Id,
+        },
         // Hora 1, Etapa Montagem, Funcionario Operator1 (another operator on same etapa/hora)
-        new { LinhaProducaoHora = linhaProdHora1Id, Etapa = etapaMontagemId, Funcionario = funcOperator1Id },
-
-        new { LinhaProducaoHora = linhaProdHora2Id, Etapa = etapaMontagemId, Funcionario = funcOperator1Id },
+        new
+        {
+          LinhaProducaoHora = linhaProdHora1Id,
+          Etapa = etapaMontagemId,
+          Funcionario = funcOperator1Id,
+        },
+        new
+        {
+          LinhaProducaoHora = linhaProdHora2Id,
+          Etapa = etapaMontagemId,
+          Funcionario = funcOperator1Id,
+        },
         // Hora 2, Etapa Qualidade, Funcionario Supervisor (assuming supervisor can also be linked)
-        new { LinhaProducaoHora = linhaProdHora2Id, Etapa = etapaQualidadeId, Funcionario = funcSupervisorId }
-    );
+        new
+        {
+          LinhaProducaoHora = linhaProdHora2Id,
+          Etapa = etapaQualidadeId,
+          Funcionario = funcSupervisorId,
+        }
+      );
   }
 }
+
 //
 // public class SessionIterceptor(IServiceProvider serviceProvider): DbConnectionInterceptor
 // {
@@ -812,12 +1127,15 @@ public class GambitoContext : DbContext
 
 public class IdentityService(IServiceProvider serviceProvider)
 {
-  readonly IHttpContextAccessor _httpContextAccessor = serviceProvider.GetService<IHttpContextAccessor>()!;
+  readonly IHttpContextAccessor _httpContextAccessor =
+    serviceProvider.GetService<IHttpContextAccessor>()!;
+
   public int? GetOrg()
   {
     var id_str = _httpContextAccessor.HttpContext?.Request.Headers["org"];
     // if (id_str is null || id_str.ToString() == "") return null;
-    if (id_str is null || id_str.ToString() == "") return 1;
+    if (id_str is null || id_str.ToString() == "")
+      return 1;
     if (id_str is null || !int.TryParse(id_str, out int id))
     {
       throw new Exception("Organização não definida ou inválida");

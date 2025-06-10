@@ -13,8 +13,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GambitoServer.Migrations
 {
     [DbContext(typeof(GambitoContext))]
-    [Migration("20250602133651_init")]
-    partial class init
+    [Migration("20250610210015_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
