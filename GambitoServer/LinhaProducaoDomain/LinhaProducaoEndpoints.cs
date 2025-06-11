@@ -131,7 +131,7 @@ public static class LinhaProducaoEndpoints
       ) =>
       {
         LocalDate? parsed_data = null;
-        if (data is not "null")
+        if (data is not null and not "null")
         {
           var parse_result = NodaTime.Text.LocalDatePattern.Iso.Parse(data);
           if (!parse_result.Success)
@@ -142,7 +142,7 @@ public static class LinhaProducaoEndpoints
         }
 
         var res = await db
-          .LinhaProducaoDia.Where(d => d.Data == parsed_data)
+          .LinhaProducaoDia.Where(d => data == "null" || d.Data == parsed_data)
           .Select(l => new LinhaProducaoDiaDtoGetDetailed(
             l.Id,
             l.LinhaProducao,
@@ -159,14 +159,13 @@ public static class LinhaProducaoEndpoints
                   new LinhaProducaoDiaProdutoConfDto(
                     h.SelectMany(he => he.LinhaProducaoHoraEtapas)
                       .SelectMany(e => e.Funcionarios)
-                      .Distinct()
                       .Count(),
                     pc.ProdutoNavigation.Nome,
                     pc.ProdutoConfigEtapas.Sum(e => e.Segundos),
                     h.Sum(hp =>
                       hp.LinhaProducaoHoraEtapas.Sum(
                         int (hpe) =>
-                          hpe.Funcionarios.Count * pc.ProdutoConfigEtapas.Sum(int (e) => e.Segundos)
+                          hpe.Funcionarios.Count * (pc.ProdutoConfigEtapas.Where(pce => pce.Etapa == hpe.Etapa).Sum(int (pce) => pce.Segundos))
                       )
                     ),
                     h.Sum(hp => hp.QtdProduzido ?? 0),
@@ -178,7 +177,7 @@ public static class LinhaProducaoEndpoints
               )
               .ToArray()
           ))
-          .ToListAsync();
+          .ToArrayAsync();
         return TypedResults.Ok(res);
       }
     );
