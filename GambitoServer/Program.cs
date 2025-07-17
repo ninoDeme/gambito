@@ -1,6 +1,8 @@
+using System.Diagnostics;
 using System.Text.Json;
 using GambitoServer.Db;
 using GambitoServer.LinhaProducaoDomain;
+using Hydro.Configuration;
 
 // using GambitoServer.LinhaProducao;
 using Microsoft.AspNetCore.Identity;
@@ -16,7 +18,7 @@ builder.Services.ConfigureHttpJsonOptions(o =>
   o.SerializerOptions.ConfigureForNodaTime(NodaTime.DateTimeZoneProviders.Tzdb);
 });
 
-builder.Services.AddControllers();
+// builder.Services.AddControllers();
 builder.Services.AddProblemDetails();
 
 builder.Services.AddAntiforgery();
@@ -69,8 +71,6 @@ builder.Services.AddIdentityCore<User>(options =>
 
 builder.Services.AddEndpointsApiExplorer();
 
-builder.Services.AddOpenApi();
-
 builder.Services.AddScoped<IdentityService>();
 
 builder.Services.AddDbContext<GambitoContext>();
@@ -81,10 +81,15 @@ builder.Logging.AddConsole();
 
 builder.Services.AddResponseCompression();
 
-builder.Services.AddRazorPages().AddViewLocalization();
+builder.Services.AddRouting();
+builder.Services.AddRazorPages();
+builder.Services.AddHydro();
 
 var app = builder.Build();
 await using var scope = app.Services.CreateAsyncScope();
+
+app.UseStaticFiles();
+app.UseRouting();
 
 app.UseStatusCodePages();
 
@@ -97,7 +102,6 @@ app.UseRequestLocalization();
 
 if (app.Environment.IsDevelopment())
 {
-  app.MapOpenApi();
   app.MapScalarApiReference();
 
   app.UseDeveloperExceptionPage();
@@ -125,13 +129,13 @@ app.UseAuthentication();
 
 app.MapGroup("api/auth").WithTags("Auth").MapIdentityApi<User>();
 
-app.MapControllers();
+// app.MapControllers();
 
 app.MapLinhaProducaoEndpoints();
 
 app.MapStaticAssets();
-app.MapRazorPages()
-   .WithStaticAssets();
+app.MapRazorPages();
+app.UseHydro();
 
 // app.MapGroup("api/org").WithTags("Org").MapPost("{name}", (GambitoContext db, string name) =>
 // {

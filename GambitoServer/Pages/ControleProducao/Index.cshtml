@@ -1,3 +1,40 @@
 @page
+@model GambitoServer.Pages.ControleProducao.IndexModel
+@{
+  ViewData["Title"] = "Controle de Produção";
+}
+
+<div class="container">
+  <div>
+    @if (Model.Semanas is not null)
+    {
+      <table>
+        <thead>
+          <th class="p-1">Dom.</th>
+          <th class="p-1">Seg.</th>
+          <th class="p-1">Ter.</th>
+          <th class="p-1">Qua.</th>
+          <th class="p-1">Qui.</th>
+          <th class="p-1">Sex.</th>
+          <th class="p-1">Sab.</th>
+        </thead>
+        <tbody>
+          @foreach (var week in Model.Semanas)
+          {
+            <tr>
+              @foreach (var date in week)
+              {
+                <td class="p-3 border text-center">
+                  @date.Day
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+
+    }
+  </div>
+</div>
 
 

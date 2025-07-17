@@ -8,6 +8,12 @@
 			"problemMatcher": []
 		},
 		{
+			"label": "shell run Server",
+			"type": "shell",
+			"command": "dotnet run --project GambitoServer/GambitoServer.csproj",
+			"problemMatcher": []
+		},
+		{
 			"label": "shell watch Server",
 			"type": "shell",
 			"command": "dotnet watch --project GambitoServer/GambitoServer.csproj",
