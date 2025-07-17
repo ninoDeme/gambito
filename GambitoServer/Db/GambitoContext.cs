@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using NodaTime;
 using Npgsql;
@@ -18,7 +19,7 @@ public interface IHasOrg
   int Organizacao { get; set; }
 }
 
-public class GambitoContext : DbContext
+public class GambitoContext : IdentityDbContext<GUser, GRole, Guid, GUserClaim, GUserRole, GUserLogin, GRoleClaim, GUserToken>
 {
   private readonly IdentityService _identity;
 
@@ -61,7 +62,7 @@ public class GambitoContext : DbContext
 
   public virtual DbSet<ProdutoConfig> ProdutoConfigs { get; set; }
 
-  public virtual DbSet<GUser> Users { get; set; }
+  // public virtual DbSet<GUser> Users { get; set; }
 
   protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
   {
@@ -542,7 +543,7 @@ public class GambitoContext : DbContext
 
     Seed(modelBuilder);
 
-    base.OnModelCreating(modelBuilder);
+    // base.OnModelCreating(modelBuilder);
   }
 
   // public override int SaveChanges()

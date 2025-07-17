@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Text.Json;
 using GambitoServer.Db;
 using GambitoServer.LinhaProducaoDomain;
@@ -29,10 +28,11 @@ builder.Services.AddLocalization();
 // builder.Services.AddAuthorization(options => {
 //     options.DefaultPolicy
 //     });
-builder.Services.AddAuthentication()
-  .AddCookie(IdentityConstants.TwoFactorRememberMeScheme)
-  .AddCookie(IdentityConstants.ApplicationScheme)
-  .AddCookie(IdentityConstants.BearerScheme);
+// builder.Services.AddAuthentication(IdentityConstants.TwoFactorRememberMeScheme)
+//   .AddCookie(IdentityConstants.TwoFactorRememberMeScheme)
+//   .AddCookie(IdentityConstants.ApplicationScheme)
+//   .AddCookie(IdentityConstants.ExternalScheme)
+//   .AddCookie(IdentityConstants.BearerScheme);
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
@@ -41,10 +41,17 @@ builder.Services.ConfigureApplicationCookie(options =>
   options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
   options.Cookie.Name = "gb-auth";
 
-  options.LoginPath = "/login";
-  options.AccessDeniedPath = "/acesso-negado";
+  // options.LoginPath = "/login";
+  // options.AccessDeniedPath = "/acesso-negado";
   options.SlidingExpiration = true;
 });
+
+builder.Services.AddAuthentication(o =>
+{
+    o.DefaultScheme = IdentityConstants.ApplicationScheme;
+    o.DefaultSignInScheme = IdentityConstants.ExternalScheme;
+})
+.AddIdentityCookies(o => { });
 
 builder.Services.AddIdentityCore<User>(options =>
 {
@@ -54,6 +61,8 @@ builder.Services.AddIdentityCore<User>(options =>
   options.Password.RequireUppercase = false;
   options.Password.RequiredLength = 6;
   options.Password.RequiredUniqueChars = 2;
+
+  options.SignIn.RequireConfirmedAccount = true;
 
   // Lockout settings.
   options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
@@ -66,6 +75,8 @@ builder.Services.AddIdentityCore<User>(options =>
   options.User.RequireUniqueEmail = true;
 })
   .AddEntityFrameworkStores<GambitoContext>()
+  .AddSignInManager()
+  .AddDefaultTokenProviders()
   // .AddRoles<IdentityRole>()
   .AddApiEndpoints();
 
@@ -75,6 +86,8 @@ builder.Services.AddScoped<IdentityService>();
 
 builder.Services.AddDbContext<GambitoContext>();
 
+// builder.Services.AddDefaultIdentity<User>(options => options.SignIn.RequireConfirmedAccount = true).AddEntityFrameworkStores<GambitoContext>();
+//
 // Logging
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();

@@ -9,21 +9,18 @@
     <button on:click="@(() => Model.Add())">
       Add
     </button>
-    <div key="2"> @Model.Nome </div>
     <button type="button" on:click="@(() => Model.PushName())">
       Add
     </button>
     <button type="button">
       Add Local
     </button>
-    <div x-text="nome" key="teste"></div>
     <div> @Model.JoinNames() </div>
-    <div x-text="names.map(n => n.nome).join()" key="teste"></div>
     @for (var i = 0; i < Model.Names.Length; i++)
     {
       <div>
         <input type="text" asp-for="Names[i].Id">
-        <input type="text" bind asp-for="Names[i].Nome" x-model="names[@@(i)].nome">
+        <input type="text" asp-for="Names[i].Nome">
         <span asp-validation-for="Names[i].Nome"></span>
       </div>
     }
