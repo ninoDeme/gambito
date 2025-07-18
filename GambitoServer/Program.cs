@@ -25,6 +25,8 @@ builder.Services.AddAntiforgery();
 // Localization
 builder.Services.AddLocalization();
 
+builder.Services.AddOpenApi();
+
 // builder.Services.AddAuthorization(options => {
 //     options.DefaultPolicy
 //     });
@@ -41,8 +43,8 @@ builder.Services.ConfigureApplicationCookie(options =>
   options.ExpireTimeSpan = TimeSpan.FromMinutes(5);
   options.Cookie.Name = "gb-auth";
 
-  // options.LoginPath = "/login";
-  // options.AccessDeniedPath = "/acesso-negado";
+  options.LoginPath = "/Account/Login";
+  options.AccessDeniedPath = "/Account/AccessDenied";
   options.SlidingExpiration = true;
 });
 
@@ -83,6 +85,7 @@ builder.Services.AddIdentityCore<User>(options =>
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddScoped<IdentityService>();
+builder.Services.AddScoped<SessionIterceptor>();
 
 builder.Services.AddDbContext<GambitoContext>();
 
@@ -115,6 +118,7 @@ app.UseRequestLocalization();
 
 if (app.Environment.IsDevelopment())
 {
+  app.MapOpenApi();
   app.MapScalarApiReference();
 
   app.UseDeveloperExceptionPage();

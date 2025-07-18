@@ -1,6 +1,8 @@
+using System.Data.Common;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using NodaTime;
 using Npgsql;
 
@@ -19,19 +21,27 @@ public interface IHasOrg
   int Organizacao { get; set; }
 }
 
-public class GambitoContext : IdentityDbContext<GUser, GRole, Guid, GUserClaim, GUserRole, GUserLogin, GRoleClaim, GUserToken>
+public class GambitoContext
+  : IdentityDbContext<GUser, GRole, Guid, GUserClaim, GUserRole, GUserLogin, GRoleClaim, GUserToken>
 {
   private readonly IdentityService _identity;
+  private readonly SessionIterceptor _sessionIterceptor;
 
-  public GambitoContext(IdentityService identity)
+  public GambitoContext(IdentityService identity, SessionIterceptor sessionIterceptor)
   {
     _identity = identity;
+    _sessionIterceptor = sessionIterceptor;
   }
 
-  public GambitoContext(DbContextOptions<GambitoContext> options, IdentityService identity)
+  public GambitoContext(
+    DbContextOptions<GambitoContext> options,
+    IdentityService identity,
+    SessionIterceptor sessionIterceptor
+  )
     : base(options)
   {
     _identity = identity;
+    _sessionIterceptor = sessionIterceptor;
   }
 
   // public bool FiltraOrg(IHasOrg entity) => entity.Organizacao == _identity.GetOrg();
@@ -71,7 +81,8 @@ public class GambitoContext : IdentityDbContext<GUser, GRole, Guid, GUserClaim, 
         $"Host=localhost:15432;Username=postgres;Password=postgres;Database=gambito",
         o => o.MapEnum<TipoHora>("tipo_hora").UseNodaTime()
       )
-      .UseSnakeCaseNamingConvention();
+      .UseSnakeCaseNamingConvention()
+      .AddInterceptors(_sessionIterceptor);
   }
 
   private void CreateIdentity(ModelBuilder builder)
@@ -1113,18 +1124,40 @@ public class GambitoContext : IdentityDbContext<GUser, GRole, Guid, GUserClaim, 
 }
 
 //
-// public class SessionIterceptor(IServiceProvider serviceProvider): DbConnectionInterceptor
-// {
-//     // readonly IHttpContextAccessor _httpContextAccessor = serviceProvider.GetService<IHttpContextAccessor>()!;
-//     public override void ConnectionOpened(DbConnection connection, ConnectionEndEventData eventData)
-//     {
-//         var conn = (NpgsqlConnection)connection;
-//         var qry = conn.CreateCommand();
-//         qry.CommandText = "TODO! SET SESSION AUTH";
-//         qry.ExecuteNonQuery();
-//         base.ConnectionOpened(connection, eventData);
-//     }
-// }
+public class SessionIterceptor(IServiceProvider serviceProvider) : DbConnectionInterceptor
+{
+  readonly IHttpContextAccessor _httpContextAccessor =
+    serviceProvider.GetService<IHttpContextAccessor>()!;
+
+  public override async Task ConnectionOpenedAsync(
+    DbConnection connection,
+    ConnectionEndEventData eventData,
+    CancellationToken cancellationToken = default
+  )
+  {
+    var id_str = _httpContextAccessor.HttpContext?.Request.Headers["org"];
+    Console.WriteLine("ID_SSSSSSSSSSSSSSSS");
+    Console.WriteLine(id_str);
+    var conn = (NpgsqlConnection)connection;
+    var qry = conn.CreateCommand();
+    qry.CommandText = "";
+    var value = qry.ExecuteScalarAsync();
+    await base.ConnectionOpenedAsync(connection, eventData, cancellationToken);
+    return;
+  }
+
+  public override void ConnectionOpened(DbConnection connection, ConnectionEndEventData eventData)
+  {
+    var id_str = _httpContextAccessor.HttpContext?.Request.Headers["org"];
+    Console.WriteLine("ID_SSSSSSSSSSSSSSSS");
+    Console.WriteLine(id_str);
+    var conn = (NpgsqlConnection)connection;
+    var qry = conn.CreateCommand();
+    qry.CommandText = "";
+    qry.ExecuteNonQuery();
+    base.ConnectionOpened(connection, eventData);
+  }
+}
 
 public class IdentityService(IServiceProvider serviceProvider)
 {
